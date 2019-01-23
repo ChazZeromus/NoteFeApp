@@ -1,0 +1,3 @@
+rootProject.name = 'NoteFeApp'
+
+include ':app'
