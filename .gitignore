@@ -23,7 +23,7 @@ yarn-error.log*
 
 **/.DS_Store
 ios/NoteFeApp.xcodeproj/xcuserdata/**
-ios/NoteFeApp.xcodeproj/project.xcworkspace/xcuserdata
+ios/NoteFeApp.xcodeproj/project.xcworkspace
 ios/build/
 
 # Ignore storybookLoader because it constantly changes and is changed on
