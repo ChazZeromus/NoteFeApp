@@ -26,3 +26,4 @@ import Welcome from './Welcome';
 
 import './Test';
 import './Playlist';
+import './NewComponents';
