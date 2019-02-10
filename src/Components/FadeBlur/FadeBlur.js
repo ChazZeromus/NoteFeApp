@@ -1,7 +1,7 @@
 // @flow
 import * as React from 'react';
-import { View, Animated, StyleSheet } from 'react-native';
-import { BlurView } from 'react-native-blur';
+import { View, Animated, StyleSheet, Platform } from 'react-native';
+import { BlurView, VibrancyView } from 'react-native-blur';
 
 import * as Types from './types';
 import styles from './styles';
@@ -10,6 +10,7 @@ type Props = {
   children?: React.Node,
   contentStyle?: StyleSheet,
   visible: boolean,
+  preferVibrancy?: boolean,
 };
 type State = {
   opacityFade: Animated.Value,
@@ -54,19 +55,29 @@ export class FadeBlur extends React.Component<Props, State> {
   render() : React.Node {
     const blurHandle: ?Types.BlurHandle = this.context;
 
-    if (!this.state.renderBlur || !blurHandle) {
+    if (!this.state.renderBlur) {
+      return null;
+    }
+
+    const BlurComponent = (
+      this.props.preferVibrancy
+      && Platform.OS === 'ios'
+    ) ? VibrancyView
+    : BlurView;
+
+    if (BlurComponent === BlurView && !blurHandle) {
       return null;
     }
 
     return (
       <Animated.View style={[styles.container, { opacity: this.state.opacityFade }]}>
         {blurHandle && (
-          <BlurView
+          <BlurComponent
             style={styles.blur}
-            viewRef={blurHandle}
             blurRadius={20} 
             blurType="dark"
             downsampleFactor={6}
+            viewRef={blurHandle}
           />
         )}
         <View style={[styles.innerContent, this.props.contentStyle]}>

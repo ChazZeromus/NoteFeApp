@@ -35,10 +35,14 @@ class TestComponent extends React.Component<{}, State> {
       <BlurBackground>
         {BlurView => (
           <>
-            <BlurView style={{ backgroundColor: '#ddd' }}>
+            <BlurView style={{ backgroundColor: '#fff' }}>
               <Button title="Blur" onPress={() => this.setState({ showBlur: true })} />
             </BlurView>
-            <FadeBlur visible={this.state.showBlur} contentStyle={{ justifyContent: 'flex-start' }}>
+            <FadeBlur
+              visible={this.state.showBlur}
+              contentStyle={{ justifyContent: 'flex-start' }}
+              preferVibrancy={true}
+            >
               <PlaylistEntry index={1} duration={330} title="Artist - Title" />
               <PlaylistEntry index={1} duration={330} title="Artist - Title" />
               <PlaylistEntry index={1} duration={330} title="Artist - Title" />
