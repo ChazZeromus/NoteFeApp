@@ -45,10 +45,8 @@ export class FadeBlur extends React.Component<Props, State> {
 
   handleObserveFade(current: {value: number}) {
     const { value: currentFade } = current;
-    console.log(current);
     const shouldShow = currentFade > 0.0;
     if (shouldShow !== this.state.renderBlur) {
-      console.log('shoulding', shouldShow);
       this.setState({ renderBlur: shouldShow });
     }
   }
