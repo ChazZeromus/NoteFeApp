@@ -1,6 +1,7 @@
 // @flow
 import * as React from 'react';
 import { Button, Text, Image, View, StyleSheet } from 'react-native';
+import { withKnobs, text, boolean, number } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react-native';
 
 import testImage from '../../../src/assets/test-image.jpg';
@@ -36,12 +37,19 @@ class TestComponent extends React.Component<{}, State> {
         {BlurView => (
           <>
             <BlurView style={{ backgroundColor: '#fff' }}>
+              {boolean('show image', false) && (
+                <Image
+                  resizeMode="cover"
+                  source={testImage}
+                  style={styles.absolute}
+                />
+              )}
               <Button title="Blur" onPress={() => this.setState({ showBlur: true })} />
             </BlurView>
             <FadeBlur
               visible={this.state.showBlur}
               contentStyle={{ justifyContent: 'flex-start' }}
-              preferVibrancy={true}
+              preferVibrancy={boolean('prefer vibrancy', true)}
             >
               <PlaylistEntry index={1} duration={330} title="Artist - Title" />
               <PlaylistEntry index={1} duration={330} title="Artist - Title" />
@@ -58,4 +66,5 @@ class TestComponent extends React.Component<{}, State> {
 }
 
 storiesOf('Blur Test', module)
+  .addDecorator(withKnobs)
   .add('Playlist Blur', () => <TestComponent />);
