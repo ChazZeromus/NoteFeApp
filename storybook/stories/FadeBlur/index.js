@@ -33,17 +33,17 @@ class TestComponent extends React.Component<{}, State> {
   render() : React.Node {
     return (
       <BlurBackground>
-        {backgroundProps => (
+        {BlurView => (
           <>
-            <View {...backgroundProps}>
-              <PlaylistEntry index={1} duration={330} title="Artist - Title" />
-              <PlaylistEntry index={1} duration={330} title="Artist - Title" />
-              <PlaylistEntry index={1} duration={330} title="Artist - Title" />
-              <PlaylistEntry index={1} duration={330} title="Artist - Title" />
-              <PlaylistEntry index={1} duration={330} title="Artist - Title" />
+            <BlurView style={{ backgroundColor: '#ddd' }}>
               <Button title="Blur" onPress={() => this.setState({ showBlur: true })} />
-            </View>
-            <FadeBlur visible={this.state.showBlur} contentStyle={{ justifyContent: 'center' }}>
+            </BlurView>
+            <FadeBlur visible={this.state.showBlur} contentStyle={{ justifyContent: 'flex-start' }}>
+              <PlaylistEntry index={1} duration={330} title="Artist - Title" />
+              <PlaylistEntry index={1} duration={330} title="Artist - Title" />
+              <PlaylistEntry index={1} duration={330} title="Artist - Title" />
+              <PlaylistEntry index={1} duration={330} title="Artist - Title" />
+              <PlaylistEntry index={1} duration={330} title="Artist - Title" />
               <Button title="Close" onPress={() => this.setState({ showBlur: false })} />
             </FadeBlur>
           </>

@@ -9,7 +9,6 @@ const backgroundStyleProp = StyleSheet.create({
     position: 'absolute',
     top: 0, left: 0, bottom: 0, right: 0,
     zIndex: 0,
-    backgroundColor: '#eee',
   }
 });
 
@@ -21,7 +20,7 @@ type RenderProps = {
   style: StyleSheet,
 }
 type Props = {
-  children: RenderProps => React.Node,
+  children: (typeof View, RenderProps) => React.Node,
 }
 export class BlurBackground extends React.Component<Props, State> {
   state: State = {
@@ -33,7 +32,6 @@ export class BlurBackground extends React.Component<Props, State> {
     if (ref) {
       this._viewRef = ref;
       const handle = findNodeHandle(ref);
-      console.log('handle', handle);
       this.setState({ blurHandle: handle });
     } else {
       this._viewRef = null;
@@ -41,10 +39,31 @@ export class BlurBackground extends React.Component<Props, State> {
     }
   }
 
+  wrappedView = (props: *) => {
+    let style: Array<Object> = [
+      backgroundStyleProp.style,
+      ...(Array.isArray(props.style) ? props.style : [props.style])
+    ];
+
+    const copyProps = {
+      ...props,
+      style,
+      ref: this.handleSetViewRef,
+    };
+
+    return <View {...copyProps} />;
+  }
+
   render() : React.Node {
     return (
       <Types.FadeBlurProvider value={this.state.blurHandle}>
-        {this.props.children({ ref: this.handleSetViewRef, style: backgroundStyleProp.style })}
+        {this.props.children(
+          this.wrappedView,
+          {
+            ref: this.handleSetViewRef,
+            style: backgroundStyleProp.style
+          },
+        )}
       </Types.FadeBlurProvider>
     );
   }

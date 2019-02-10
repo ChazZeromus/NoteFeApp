@@ -12,7 +12,6 @@ const style : StyleSheet.Styles = {
 
     borderBottomWidth: 1,
     borderBottomColor: '#000',
-    backgroundColor: '#f00',
   },
 };
 

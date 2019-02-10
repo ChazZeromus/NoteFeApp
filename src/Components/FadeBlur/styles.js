@@ -6,7 +6,6 @@ const style : StyleSheet.Styles = {
     position: 'absolute',
     top: 0, left: 0, bottom: 0, right: 0,
     flex: 1,
-    // backgroundColor: '#f00',
   },
   innerContent: {
     position: 'absolute',
@@ -16,7 +15,6 @@ const style : StyleSheet.Styles = {
   blur: {
     position: 'absolute',
     top: 0, left: 0, bottom: 0, right: 0,
-    // backgroundColor: '#f00',
   }
 };
 

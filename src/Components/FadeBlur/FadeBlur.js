@@ -54,7 +54,7 @@ export class FadeBlur extends React.Component<Props, State> {
   render() : React.Node {
     const blurHandle: ?Types.BlurHandle = this.context;
 
-    if (!this.state.renderBlur) {
+    if (!this.state.renderBlur || !blurHandle) {
       return null;
     }
 
@@ -64,7 +64,7 @@ export class FadeBlur extends React.Component<Props, State> {
           <BlurView
             style={styles.blur}
             viewRef={blurHandle}
-            blurRadius={25} 
+            blurRadius={20} 
             blurType="dark"
             downsampleFactor={6}
           />

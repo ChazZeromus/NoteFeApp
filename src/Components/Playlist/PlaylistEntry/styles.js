@@ -14,7 +14,6 @@ const style : StyleSheet.Styles = {
 
   },
   timeText: {
-    backgroundColor: '#ef0',
   },
   text: {
     color: '#fff',
