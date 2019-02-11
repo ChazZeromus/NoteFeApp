@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Button, Text, Image, View, StyleSheet } from 'react-native';
 import { withKnobs, text, boolean, number } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react-native';
+import LinearGradient from 'react-native-linear-gradient';
 
 import testImage from '../../../src/assets/test-image.jpg';
 
@@ -41,7 +42,7 @@ class TestComponent extends React.Component<{}, State> {
                 <Image
                   resizeMode="cover"
                   source={testImage}
-                  style={styles.absolute}
+                  style={[styles.absolute, { right: 0, bottom: 0 }]}
                 />
               )}
               <Button title="Blur" onPress={() => this.setState({ showBlur: true })} />
@@ -51,6 +52,14 @@ class TestComponent extends React.Component<{}, State> {
               contentStyle={{ justifyContent: 'flex-start' }}
               preferVibrancy={boolean('prefer vibrancy', true)}
             >
+              {boolean('show gradient', true) && (
+                <LinearGradient
+                  start={{x: 0.0, y: 2}} end={{x: 0, y: -1}}
+                  locations={[0,0.6]}
+                  colors={['rgb(255, 255, 255)', 'rgba(255, 255, 255, 0)']}
+                  style={[styles.absolute, { right: 0, bottom: 0}]}>
+                </LinearGradient>
+              )}
               <PlaylistEntry index={1} duration={330} title="Artist - Title" />
               <PlaylistEntry index={1} duration={330} title="Artist - Title" />
               <PlaylistEntry index={1} duration={330} title="Artist - Title" />
