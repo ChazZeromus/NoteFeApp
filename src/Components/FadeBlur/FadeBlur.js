@@ -35,7 +35,7 @@ export class FadeBlur extends React.Component<Props, State> {
     if (visible !== prevProps.visible) {
       Animated.timing(this.state.opacityFade, {
         toValue: visible ? 1 : 0,
-        duration: 250
+        duration: visible ? 400 : 250,
       }).start();
     }
   }
