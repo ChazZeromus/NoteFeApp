@@ -1,10 +1,8 @@
 // @flow
 import { StyleSheet } from 'react-native';
 
-const style : StyleSheet.Styles = {
+export default {
   text: {
-
+    color: '#eee',
   },
 };
-
-export default StyleSheet.create(style);

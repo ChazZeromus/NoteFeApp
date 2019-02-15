@@ -1,5 +1,6 @@
 // @flow
 import { StyleSheet } from 'react-native';
+import globalStyle from '../../../styles';
 
 const style : StyleSheet.Styles = {
   left: {
@@ -16,7 +17,7 @@ const style : StyleSheet.Styles = {
   timeText: {
   },
   text: {
-    color: '#fff',
+    ...globalStyle.text
   },
 };
 

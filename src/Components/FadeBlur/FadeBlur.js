@@ -11,6 +11,7 @@ type Props = {
   contentStyle?: StyleSheet,
   visible: boolean,
   preferVibrancy?: boolean,
+  containerStyle?: StyleSheet,
 };
 type State = {
   opacityFade: Animated.Value,
@@ -70,7 +71,7 @@ export class FadeBlur extends React.Component<Props, State> {
     }
 
     return (
-      <Animated.View style={[styles.container, { opacity: this.state.opacityFade }]}>
+      <Animated.View style={[styles.container, this.props.containerStyle, { opacity: this.state.opacityFade }]}>
         {blurHandle && (
           <BlurComponent
             style={styles.blur}
