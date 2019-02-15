@@ -33,7 +33,6 @@ class Card extends React.Component<CardProps, CardState> {
   componentDidMount() {
     this.animTrans.addListener(({value}) => {
       this.lastTransValue = value;
-      console.log(value);
     });
   }
 
@@ -43,6 +42,7 @@ class Card extends React.Component<CardProps, CardState> {
 
   constructor() {
     super();
+    
     this.responder = PanResponder.create({
       onStartShouldSetPanResponder: (evt, gestureState) => true,
       onPanResponderTerminationRequest: (evt, gestureState) => true,
@@ -50,11 +50,50 @@ class Card extends React.Component<CardProps, CardState> {
         this.transOffset = this.lastTransValue;
       },
       onPanResponderMove: (evt, gestureState) => {
-        Animated.event([{ dx: this.animTrans }])({
-          dx: this.transOffset + gestureState.dx
+        // Card offset from left side of screen
+        const swipeOffset = this.transOffset + gestureState.dx;
+        // Progress of card's position across width
+        const rightProgress = Math.min(swipeOffset / this.props.viewWidth, this.props.viewWidth);
+        // Same as above but absolute if card goes left
+        const rightProgressAbs = Math.min(Math.abs(swipeOffset) / this.props.viewWidth, this.props.viewWidth);
+
+        Animated.event([{
+          swipeOffset: this.animTrans,
+          rotate: this.animRotate,
+          scale: this.animScale,
+        }])({
+          swipeOffset,
+          rotate: rightProgress * 0.99,
+          scale: 1.0 - (rightProgressAbs * 0.3),
         });
       },
+      onPanResponderRelease: (evt, gestureState) => {
+        const swipeOffset = this.transOffset + gestureState.dx;
+        const doRight = swipeOffset > (this.props.viewWidth * 0.3);
+        this.doAnimation(doRight);
+      }
     });
+  }
+
+  doAnimation(collapsed: boolean) {
+    const duration = 200;
+    Animated.parallel([
+      Animated.timing(this.animRotate, {
+        toValue: collapsed ? 0.99 : 0,
+        useNativeDriver: true,
+        duration,
+      }),
+      Animated.timing(this.animTrans, {
+        toValue: collapsed ? this.props.viewWidth : 0,
+        useNativeDriver: true,
+        duration,
+      }),
+      Animated.timing(this.animScale, {
+        toValue: collapsed ? 0.7 : 1,
+        useNativeDriver: true,
+        duration,
+      })
+    ]).start();
   }
 
   handlePress = () => {
@@ -62,23 +101,7 @@ class Card extends React.Component<CardProps, CardState> {
     this.setState({
       rotated: isRotated,
     });
-    Animated.parallel([
-      Animated.timing(this.animRotate, {
-        toValue: isRotated ? 0.99 : 0,
-        useNativeDriver: true,
-        duration: 1000,
-      }),
-      Animated.timing(this.animTrans, {
-        toValue: isRotated ? this.props.viewWidth : 0,
-        useNativeDriver: true,
-        duration: 1000,
-      }),
-      Animated.timing(this.animScale, {
-        toValue: isRotated ? 0.7 : 1,
-        useNativeDriver: true,
-        duration: 1000,
-      })
-    ]).start();
+    this.doAnimation(isRotated);
   }
 
   panBaseView: types.PanBaseView = (props: types.PanBaseViewProps) => {
@@ -100,6 +123,7 @@ class Card extends React.Component<CardProps, CardState> {
       <Animated.View
         style={[styles.cardStyle, {
           transform: [
+            {perspective: 1000 },
             {translateX: this.animTrans},
             {rotateY: interpRotate},
             {scale: this.animScale},
