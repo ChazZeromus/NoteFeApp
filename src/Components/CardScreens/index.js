@@ -27,7 +27,6 @@ class Card extends React.Component<CardProps, CardState> {
 
   responder: PanResponder;
 
-  viewWidth: number = 0;
   lastTransValue: number = 0;
   transOffset: number = 0;
 
@@ -70,7 +69,7 @@ class Card extends React.Component<CardProps, CardState> {
         duration: 1000,
       }),
       Animated.timing(this.animTrans, {
-        toValue: isRotated ? this.viewWidth : 0,
+        toValue: isRotated ? this.props.viewWidth : 0,
         useNativeDriver: true,
         duration: 1000,
       }),
