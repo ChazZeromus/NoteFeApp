@@ -8,7 +8,8 @@ export type PanBaseViewProps = {
 export type PanBaseView = React.ComponentType<PanBaseViewProps>;
 
 export type ScreenProps = {
-  PanBaseView: PanBaseView,
+  routeId: string,
+  panHandlers: Object,
   isReady: boolean,
 };
 

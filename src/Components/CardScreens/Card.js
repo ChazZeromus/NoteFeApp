@@ -22,16 +22,22 @@ type Props = {
   getSides: () => CardSides,
   onRest: () => void,
   restrictedPullDistance: number,
+  routeId: string,
+  hidden?: boolean,
 }
 
-type State = {};
+type State = {
+  isFocused: boolean,
+};
 
 export default class Card extends React.Component<Props, State> {
   static defaultProps = {
     restrictedPullDistance: 10,
   };
 
-  state: State = {};
+  state: State = {
+    isFocused: false,
+  };
 
   animRotate = new Animated.Value(0);
   animTrans = new Animated.Value(0);
@@ -53,25 +59,46 @@ export default class Card extends React.Component<Props, State> {
     this.responder = PanResponder.create({
       onStartShouldSetPanResponder: (evt, gestureState) => true,
       onPanResponderTerminationRequest: (evt, gestureState) => true,
-      onPanResponderGrant: this.handlePanGrant.bind(this),
-      onPanResponderMove: this.handlePanMove.bind(this),
-      onPanResponderRelease: this.handlePanRelease.bind(this),
+      onPanResponderGrant: this._handlePanGrant.bind(this),
+      onPanResponderMove: this._handlePanMove.bind(this),
+      onPanResponderRelease: this._handlePanRelease.bind(this),
     });
   }
 
-  handlePanGrant(evt: any, gestureState: any) {
+  componentDidMount() {
+    this.animTrans.addListener(({value}) => {
+      this.lastTransValue = value;
+      this.updateFocus();
+    });
+  }
+
+  componentWillUnmount() {
+    this.animTrans.removeAllListeners();
+  }
+
+  updateFocus() {
+    const value = this.lastTransValue;
+
+    if (value === 0 && !this.state.isFocused) {
+      this.setState({ isFocused: true });
+      this.props.onRest();
+    }
+    else if (value !== 0 && this.state.isFocused) {
+      this.setState({ isFocused: false });
+    }
+  }
+
+  _handlePanGrant(evt: any, gestureState: any) {
     this.transOffset = this.lastTransValue;
     this.sides = this.props.getSides();
   }
 
-  handlePanMove(evt: any, gestureState: any) {
+  _handlePanMove(evt: any, gestureState: any) {
     const swipeOffset = this.transOffset + gestureState.dx;
     this.animate(this._calculateAnimation(
       swipeOffset,
       this._shouldRestrict(swipeOffset),
     ));
-
-    console.log(this.sides);
 
     // Animate surrounding cards
     const { leftRef, rightRef } = this.sides;
@@ -87,7 +114,7 @@ export default class Card extends React.Component<Props, State> {
     }
   }
   
-  handlePanRelease(evt: any, gestureState: any) {
+  _handlePanRelease(evt: any, gestureState: any) {
     const swipeOffset = this.transOffset + gestureState.dx;
     const foldRightCutOff = this.props.viewWidth * 0.3;
     const restrict = this._shouldRestrict(swipeOffset);
@@ -107,16 +134,6 @@ export default class Card extends React.Component<Props, State> {
     if (leftRef) {
       leftRef.doFold(-1 + foldDir);
     }
-  }
-
-  componentDidMount() {
-    this.animTrans.addListener(({value}) => {
-      this.lastTransValue = value;
-    });
-  }
-
-  componentWillUnmount() {
-    this.animTrans.removeAllListeners();
   }
 
   _shouldRestrict(swipeOffset: number) : boolean {
@@ -147,8 +164,8 @@ export default class Card extends React.Component<Props, State> {
 
     return {
       translate: swipeOffset,
-      rotate: rightProgress * 0.99,
-      scale: 1.0 - (rightProgressAbs * 0.3),
+      rotate: rightProgress,
+      scale: 1.0 - (rightProgressAbs * 0.4),
     };
   }
 
@@ -180,14 +197,6 @@ export default class Card extends React.Component<Props, State> {
     this.doFold(1);
   }
 
-  panBaseView: types.PanBaseView = (props: types.PanBaseViewProps) => {
-    return (
-      <View style={styles.panBaseContainer} {...this.responder.panHandlers}>
-        {props.children}
-      </View>
-    );
-  };
-
   render() : React.Node {
     const Screen = this.props.screen;
     const interpRotate = this.animRotate.interpolate({
@@ -197,19 +206,23 @@ export default class Card extends React.Component<Props, State> {
 
     return (
       <Animated.View
-        style={[styles.cardStyle, {
-          transform: [
-            {perspective: 1000 },
-            {translateX: this.animTrans},
-            {rotateY: interpRotate},
-            {scale: this.animScale},
-          ]
-        }]}
+        style={[
+          styles.cardStyle,
+          {
+            transform: [
+              {perspective: 1000 },
+              {translateX: this.animTrans},
+              {rotateY: interpRotate},
+              {scale: this.animScale},
+            ]
+          },
+          { opacity: this.props.hidden ? 0 : 1 }
+        ]}
       >
-        <Button title="YEET" onPress={this.handlePress} />
         <Screen
-          PanBaseView={this.panBaseView}
-          isReady={true}
+          routeId={this.props.routeId}
+          panHandlers={this.responder.panHandlers}
+          isReady={this.state.isFocused}
         />
       </Animated.View>
     )

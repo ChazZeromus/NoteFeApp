@@ -7,28 +7,18 @@ import { storiesOf } from '@storybook/react-native';
 import CardScreens from '../../../src/Components/CardScreens';
 import * as types from '../../../src/Components/CardScreens/types';
 
-const Screen1 = (props: types.ScreenProps) => (
-  <props.PanBaseView>
-    <Text>Screen 1</Text>
-  </props.PanBaseView>
-);
-
-const Screen2 = (props: types.ScreenProps) => (
-  <props.PanBaseView>
-    <Text>Screen 2</Text>
-  </props.PanBaseView>
-);
-
-const Screen3 = (props: types.ScreenProps) => (
-  <props.PanBaseView>
-    <Text>Screen 3</Text>
-  </props.PanBaseView>
+const Screen = (props: types.ScreenProps) => (
+  <View style={{ flex: 1, backgroundColor: props.isReady ? '#afa' : '#aaa' }} {...props.panHandlers}>
+    <Text>{props.routeId}</Text>
+  </View>
 );
 
 const routes = [
-  { id: 'screen1', screen: Screen1 },
-  { id: 'screen2', screen: Screen2 },
-  { id: 'screen3', screen: Screen3 },
+  { id: 'screen1', screen: Screen },
+  { id: 'screen2', screen: Screen },
+  { id: 'screen3', screen: Screen },
+  { id: 'screen4', screen: Screen },
+  // { id: 'screen3', screen: Screen3 },
 ];
 
 storiesOf('Card Screens', module)
