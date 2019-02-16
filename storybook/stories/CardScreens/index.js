@@ -18,11 +18,10 @@ const routes = [
   { id: 'screen2', screen: Screen },
   { id: 'screen3', screen: Screen },
   { id: 'screen4', screen: Screen },
-  // { id: 'screen3', screen: Screen3 },
 ];
 
 storiesOf('Card Screens', module)
   .addDecorator(withKnobs)
-  .add('Three screen test', () => (
+  .add('Four screen test', () => (
     <CardScreens routes={routes} initialRoute="screen1" />
   ));
