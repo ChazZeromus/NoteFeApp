@@ -2,143 +2,13 @@
 import * as React from 'react';
 import { View, Button, Animated, PanResponder } from 'react-native';
 
+import Card from './Card';
+import type { CardSides } from './Card';
+
 import styles from './styles';
 import * as types from './types';
 
-type CardProps = {
-  screen: types.ScreenComponentType,
-  viewWidth: number,
-}
-
-type CardState = {
-  rotated: boolean,
-}
-
 import { withKnobs, text, boolean, number } from '@storybook/addon-knobs';
-
-class Card extends React.Component<CardProps, CardState> {
-  state: CardState = {
-    rotated: false,
-  };
-
-  animRotate = new Animated.Value(0);
-  animTrans = new Animated.Value(0);
-  animScale = new Animated.Value(1);
-
-  responder: PanResponder;
-
-  lastTransValue: number = 0;
-  transOffset: number = 0;
-
-  componentDidMount() {
-    this.animTrans.addListener(({value}) => {
-      this.lastTransValue = value;
-    });
-  }
-
-  componentWillUnmount() {
-    this.animTrans.removeAllListeners();
-  }
-
-  constructor() {
-    super();
-    
-    this.responder = PanResponder.create({
-      onStartShouldSetPanResponder: (evt, gestureState) => true,
-      onPanResponderTerminationRequest: (evt, gestureState) => true,
-      onPanResponderGrant: (evt, gestureState) => {
-        this.transOffset = this.lastTransValue;
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        // Card offset from left side of screen
-        const swipeOffset = this.transOffset + gestureState.dx;
-        // Progress of card's position across width
-        const rightProgress = Math.min(swipeOffset / this.props.viewWidth, this.props.viewWidth);
-        // Same as above but absolute if card goes left
-        const rightProgressAbs = Math.min(Math.abs(swipeOffset) / this.props.viewWidth, this.props.viewWidth);
-
-        Animated.event([{
-          swipeOffset: this.animTrans,
-          rotate: this.animRotate,
-          scale: this.animScale,
-        }])({
-          swipeOffset,
-          rotate: rightProgress * 0.99,
-          scale: 1.0 - (rightProgressAbs * 0.3),
-        });
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        const swipeOffset = this.transOffset + gestureState.dx;
-        const doRight = swipeOffset > (this.props.viewWidth * 0.3);
-        this.doAnimation(doRight);
-      }
-    });
-  }
-
-  doAnimation(collapsed: boolean) {
-    const duration = 200;
-    Animated.parallel([
-      Animated.timing(this.animRotate, {
-        toValue: collapsed ? 0.99 : 0,
-        useNativeDriver: true,
-        duration,
-      }),
-      Animated.timing(this.animTrans, {
-        toValue: collapsed ? this.props.viewWidth : 0,
-        useNativeDriver: true,
-        duration,
-      }),
-      Animated.timing(this.animScale, {
-        toValue: collapsed ? 0.7 : 1,
-        useNativeDriver: true,
-        duration,
-      })
-    ]).start();
-  }
-
-  handlePress = () => {
-    const isRotated = !this.state.rotated;
-    this.setState({
-      rotated: isRotated,
-    });
-    this.doAnimation(isRotated);
-  }
-
-  panBaseView: types.PanBaseView = (props: types.PanBaseViewProps) => {
-    return (
-      <View style={styles.panBaseContainer} {...this.responder.panHandlers}>
-        {props.children}
-      </View>
-    );
-  };
-
-  render() : React.Node {
-    const Screen = this.props.screen;
-    const interpRotate = this.animRotate.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0deg', '90deg'],
-    });
-
-    return (
-      <Animated.View
-        style={[styles.cardStyle, {
-          transform: [
-            {perspective: 1000 },
-            {translateX: this.animTrans},
-            {rotateY: interpRotate},
-            {scale: this.animScale},
-          ]
-        }]}
-      >
-        <Button title="Do it" onPress={this.handlePress} />
-        <Screen
-          PanBaseView={this.panBaseView}
-          isReady={true}
-        />
-      </Animated.View>
-    )
-  }
-}
 
 type Props = {
   routes: types.CardScreenRoutes,
@@ -158,6 +28,8 @@ export default class CardScreens extends React.Component<Props, State> {
     cardList: [],
   };
 
+  refMap: Map<string, React.ElementRef<typeof Card>> = new Map();
+
   componentDidMount() {
     this.setState({ currentRoute: this.props.initialRoute });
   }
@@ -171,6 +43,14 @@ export default class CardScreens extends React.Component<Props, State> {
 
     if (shouldUpdate) {
       this.updateCardList();
+    }
+  }
+
+  handleUpdateRef(route: string, ref: ?React.ElementRef<typeof Card>) {
+    if (ref) {
+      this.refMap.set(route, ref);
+    } else {
+      this.refMap.delete(route);
     }
   }
 
@@ -192,6 +72,15 @@ export default class CardScreens extends React.Component<Props, State> {
     this.setState({ cardList });
   }
 
+  handleGetSides(current: string) : CardSides {
+    const count = this.props.routes.length;
+    const currentIndex = this.props.routes.findIndex(s => s.id === current);
+    return {
+      leftRef: currentIndex > 0 ? this.refMap.get(this.props.routes[currentIndex - 1].id) : null,
+      rightRef: currentIndex < count - 1 ? this.refMap.get(this.props.routes[currentIndex + 1].id) : null,
+    };
+  }
+
   render() : React.Node {
     const { viewWidth } = this.state;
     return (
@@ -201,7 +90,15 @@ export default class CardScreens extends React.Component<Props, State> {
       >
       {
         viewWidth
-        ? this.state.cardList.map(({id, screen}) => <Card viewWidth={viewWidth} screen={screen} key={id} />)
+        ? this.state.cardList.map(({id, screen}) => (
+          <Card
+            ref={ref => this.handleUpdateRef(id, ref)}
+            getSides={() => this.handleGetSides(id)}
+            viewWidth={viewWidth}
+            screen={screen}
+            key={id}
+          />
+        ))
         : null
       }
       </View>
