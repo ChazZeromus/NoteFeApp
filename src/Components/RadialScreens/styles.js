@@ -14,9 +14,9 @@ export const svgStyles = {
     width: "150",
     height: "150",
   },
-};
-
-export const segmentStyle = {
-  x: 75,
-  y: 75,
+  segment: {
+    stroke: "none",
+    fill: "#f88",
+    fillOpacity: "0.7"
+  },
 };

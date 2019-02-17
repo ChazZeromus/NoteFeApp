@@ -3,6 +3,8 @@ import * as React from 'react';
 import { Path } from 'react-native-svg';
 import * as utils from './utils';
 
+import { svgStyles } from './styles';
+
 type SegmentProps = {
   x: number,
   y: number,
@@ -26,6 +28,7 @@ export default class RadialSegment extends React.PureComponent<SegmentProps> {
     return (
       <Path
         d={`${stroke.result}`}
+        {...svgStyles.segment}
         {...otherProps}
       />
     );

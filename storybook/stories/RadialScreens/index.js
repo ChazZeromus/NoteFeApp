@@ -28,8 +28,6 @@ storiesOf('Radial Screens', module)
                 y={50}
                 startAngle={start}
                 endAngle={end}
-                fill="#f00"
-                fillOpacity="0.5"
               />
             </Svg>
             <Text style={{ position: 'absolute', left: 0, top: 0, }}>
@@ -51,8 +49,6 @@ storiesOf('Radial Screens', module)
         y={50}
         startAngle={190}
         endAngle={410}
-        fill="#f00"
-        fillOpacity="0.5"
       />
     </Svg>
   ));

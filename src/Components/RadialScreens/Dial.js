@@ -3,7 +3,7 @@ import * as React from 'react';
 import { View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
-import styles, { svgStyles, segmentStyle } from './styles';
+import styles, { svgStyles } from './styles';
 
 import RadialSegment from './RadialSegment';
 
