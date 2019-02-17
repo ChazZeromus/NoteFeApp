@@ -38,11 +38,11 @@ class TestComponent extends React.Component<{}, State> {
         {BlurView => (
           <>
             <BlurView style={{ backgroundColor: '#fff' }}>
-              {boolean('show image', false) && (
+              {boolean('show image', true) && (
                 <Image
                   resizeMode="cover"
                   source={testImage}
-                  style={[styles.absolute, { right: 0, bottom: 0 }]}
+                  style={[styles.absolute, { left: 0, top: 0, width: '100%', height: '100%' }]}
                 />
               )}
               <Button title="Blur" onPress={() => this.setState({ showBlur: true })} />

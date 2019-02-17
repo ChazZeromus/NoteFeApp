@@ -1,9 +1,19 @@
 // @flow
-import { AppRegistry } from 'react-native';
-import { getStorybookUI, configure } from '@storybook/react-native';
+import * as React from 'react';
+import { AppRegistry, StatusBar, Text } from 'react-native';
+import { getStorybookUI, configure, addDecorator } from '@storybook/react-native';
 import { name as appName } from '../app.json';
 
 import './rn-addons';
+
+const StatusBarDecorator = (storyFn) => (
+  <>
+    <StatusBar hidden />
+    {storyFn()}
+  </>
+);
+
+addDecorator(StatusBarDecorator);
 
 // import stories
 configure(() => {

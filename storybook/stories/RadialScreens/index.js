@@ -66,7 +66,7 @@ storiesOf('Radial Screens', module)
         endAngle={100}
         contentOffset={7}
       >
-        <G transform="translate(-8, -8)">
+        <G transform="translate(-8, -8)" opacity="0.5">
           <NextIcon width={16} height={16} />
         </G>
       </RadialSegment>
@@ -80,7 +80,7 @@ storiesOf('Radial Screens', module)
         endAngle={100 + 180}
         contentOffset={7}
       >
-        <G transform="rotate(180) translate(-8, -8)">
+        <G transform="rotate(180) translate(-8, -8)" opacity="0.5">
           <NextIcon width={16} height={16} />
         </G>
       </RadialSegment>
@@ -94,7 +94,7 @@ storiesOf('Radial Screens', module)
         endAngle={180}
         contentOffset={7}
       >
-        <G transform="rotate(180) translate(-8, -8)">
+        <G transform="rotate(180) translate(-8, -8)" opacity="0.5">
           <NextIcon width={16} height={16} />
         </G>
       </RadialSegment>
