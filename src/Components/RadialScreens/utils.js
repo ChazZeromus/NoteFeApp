@@ -34,9 +34,20 @@ export class Stroke {
   // Path attribute value to use for SVG Path component
   _result: string;
 
-  constructor(origin: Coord) {
-    this.current = origin;
-    this._result = `M ${origin.x} ${origin.y}`;
+  constructor(origin: Coord | Stroke) {
+    if (origin instanceof Stroke) {
+      this.current = origin.current;
+      this.currentCenter = origin.currentCenter;
+      this.lastArcAngle = origin.lastArcAngle;
+      this._result = origin._result;
+    } else {
+      this.current = origin;
+      this._result = `M ${origin.x} ${origin.y}`;
+    }
+  }
+
+  clone() : Stroke {
+    return new Stroke(this);
   }
 
   get x() : number { return this.current.x; }
