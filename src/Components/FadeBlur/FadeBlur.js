@@ -14,49 +14,55 @@ type Props = {
   containerStyle?: StyleSheet,
 };
 type State = {
-  opacityFade: Animated.Value,
-  renderBlur: boolean,
+  showView: boolean,
 };
-
-const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
 export class FadeBlur extends React.Component<Props, State> {
   static contextType = Types.FadeBlurContext;
+  opacityFade = new Animated.Value(0);
   state: State = {
-    opacityFade: new Animated.Value(0),
-    renderBlur: false,
+    showView: false,
   }
 
   componentDidMount() {
-    this.state.opacityFade.addListener(this.handleObserveFade.bind(this));
+    this.opacityFade.addListener(this.handleObserveFade.bind(this));
   }
 
   componentDidUpdate(prevProps: Props) {
     const { visible } = this.props;
+
     if (visible !== prevProps.visible) {
-      Animated.timing(this.state.opacityFade, {
+      Animated.timing(this.opacityFade, {
         toValue: visible ? 1 : 0,
-        duration: visible ? 400 : 250,
+        duration: visible ? 450 : 250,
+        useNativeDriver: true,
       }).start();
     }
   }
 
   componentWillUnmount() {
-    this.state.opacityFade.removeAllListeners();
+    this.opacityFade.removeAllListeners();
   }
 
   handleObserveFade(current: {value: number}) {
     const { value: currentFade } = current;
     const shouldShow = currentFade > 0.0;
-    if (shouldShow !== this.state.renderBlur) {
-      this.setState({ renderBlur: shouldShow });
+    if (shouldShow !== this.state.showView) {
+      this.setState({ showView: shouldShow });
+      // TODO: Hack to fix issue with animations not triggering listeners if a component that already
+      // was mounted and used those animations were unmounted. See Animation listener bug in storybook
+      // for more info.
+      if (!shouldShow) {
+        this.opacityFade.removeAllListeners();
+        this.opacityFade.addListener(this.handleObserveFade.bind(this));
+      }
     }
   }
 
   render() : React.Node {
     const blurHandle: ?Types.BlurHandle = this.context;
 
-    if (!this.state.renderBlur) {
+    if (!this.state.showView) {
       return null;
     }
 
@@ -71,7 +77,13 @@ export class FadeBlur extends React.Component<Props, State> {
     }
 
     return (
-      <Animated.View style={[styles.container, this.props.containerStyle, { opacity: this.state.opacityFade }]}>
+      <Animated.View
+        style={[
+          styles.container,
+          this.props.containerStyle,
+          { opacity: this.opacityFade }
+        ]}
+      >
         {blurHandle && (
           <BlurComponent
             style={styles.blur}
