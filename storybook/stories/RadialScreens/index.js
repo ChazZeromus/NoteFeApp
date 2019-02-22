@@ -25,7 +25,7 @@ storiesOf('Radial Screens', module)
               <Circle cx="50" cy="50" r="3" fill="pink" />
               <RadialSegment
                 innerRadius={15}
-                thickness={35}
+                outerRadius={35}
                 x={50}
                 y={50}
                 startAngle={start}
@@ -46,7 +46,7 @@ storiesOf('Radial Screens', module)
       <Circle cx="50" cy="50" r="3" fill="pink" />
       <RadialSegment
         innerRadius={15}
-        thickness={35}
+        outerRadius={35}
         x={50}
         y={50}
         startAngle={190}
@@ -59,7 +59,7 @@ storiesOf('Radial Screens', module)
       <Circle cx="100" cy="100" r="3" fill="pink" />
       <RadialSegment
         innerRadius={25}
-        thickness={45}
+        outerRadius={45}
         x={100}
         y={100}
         startAngle={80}
@@ -73,7 +73,7 @@ storiesOf('Radial Screens', module)
 
       <RadialSegment
         innerRadius={25}
-        thickness={45}
+        outerRadius={45}
         x={100}
         y={100}
         startAngle={80 + 180}
@@ -87,7 +87,7 @@ storiesOf('Radial Screens', module)
 
       <RadialSegment
         innerRadius={25}
-        thickness={45}
+        outerRadius={45}
         x={100}
         y={100}
         startAngle={135}

@@ -7,13 +7,13 @@ export type Segment = {
   value?: number,
 };
 
-export type SegmentList = Array<Segment>;
-
 export type SegmentDesc = {
   segment: Segment,
   startAngle: number,
   endAngle: number,
 };
+
+export type SegmentDescList = Array<SegmentDesc>;
 
 export type SegmentGroupDesc = {
   name: string,

@@ -20,3 +20,6 @@ export const svgStyles = {
     fillOpacity: "0.7"
   },
 };
+
+export const segmentInnerRadius = 20;
+export const segmentThickness = 40;
