@@ -5,7 +5,7 @@ import Svg, { Circle } from 'react-native-svg';
 
 import styles, { svgStyles } from './styles';
 
-import RadialSegment from './RadialSegment';
+import Segment from './Segment';
 
 type Props = {};
 type State = {};

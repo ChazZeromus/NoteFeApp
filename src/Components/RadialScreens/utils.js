@@ -1,4 +1,5 @@
 // @flow
+import * as utils from './utils';
 
 type Coord = {x: number, y: number};
 

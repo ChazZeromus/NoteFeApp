@@ -4,7 +4,7 @@ export type Segment = {
   id: string,
   icon: string,
   color?: string,
-  size?: number,
+  value?: number,
 };
 
 export type SegmentList = Array<Segment>;
@@ -20,4 +20,5 @@ export type SegmentGroupDesc = {
   color: string,
   startAngle: number,
   endAngle: number,
+  totalValue: number,
 };

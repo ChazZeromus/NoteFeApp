@@ -8,7 +8,7 @@ import Svg, { Circle, G } from 'react-native-svg';
 import NextIcon from '../../../src/assets/icons/next.svg';
 
 import RadialScreens from '../../../src/Components/RadialScreens';
-import RadialSegment from '../../../src/Components/RadialScreens/RadialSegment';
+import RadialSegment from '../../../src/Components/RadialScreens/Segment';
 import Dial from '../../../src/Components/RadialScreens/Dial';
 import * as types from '../../../src/Components/RadialScreens/types';
 
