@@ -1,7 +1,5 @@
 // @flow
-import * as utils from './utils';
-
-type Coord = {x: number, y: number};
+import type { Coord } from './types';
 
 function xyToDir(
   centerX: number,

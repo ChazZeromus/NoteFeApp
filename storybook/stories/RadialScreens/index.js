@@ -5,7 +5,9 @@ import { withKnobs, text, boolean, number } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react-native';
 import Svg, { Circle, G } from 'react-native-svg';
 
-import NextIcon from '../../../src/assets/icons/next.svg';
+import * as Icons from '../../../src/Components/Icons';
+
+const NextIcon = Icons.Next;
 
 import RadialScreens from '../../../src/Components/RadialScreens';
 import RadialSegment from '../../../src/Components/RadialScreens/Segment';
@@ -99,4 +101,22 @@ storiesOf('Radial Screens', module)
         </G>
       </RadialSegment>
     </Svg>
-  ));
+  ))
+  .add('Dial', () => (
+    <Dial
+      position={{ x: 0, y: 0 }}
+      selector={{ x: 130, y: 70 }}
+      innerRadius={20}
+      outerRadius={50}
+      segmentList={[
+        {
+          startAngle:45,
+          endAngle: 135,
+          segment: {
+            id: 'test',
+            icon: 'Next',
+          }
+        }
+      ]}
+    />
+  ))

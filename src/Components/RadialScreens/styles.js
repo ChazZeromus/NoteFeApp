@@ -16,7 +16,7 @@ export const svgStyles = {
   },
   segment: {
     stroke: "none",
-    fill: "#f88",
+    fill: "#f00",
     fillOpacity: "0.7"
   },
 };

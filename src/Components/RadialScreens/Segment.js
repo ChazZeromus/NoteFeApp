@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { Path, G, Circle } from 'react-native-svg';
 import * as utils from './utils';
+import _ from 'lodash';
 
 import { svgStyles } from './styles';
 
@@ -30,6 +31,7 @@ export default class Segment extends React.PureComponent<Props> {
 
     const stroke = new utils.Stroke({x, y});
     const insidePosition = stroke.clone();
+    const effectiveProps = _.merge({}, svgStyles.segment, otherProps);
 
     stroke.setCenter()
       .moveDir(startAngle, innerRadius)
@@ -46,8 +48,7 @@ export default class Segment extends React.PureComponent<Props> {
       <>
         <Path
           d={stroke.result}
-          {...svgStyles.segment}
-          {...otherProps}
+          {...effectiveProps}
         />
         <G transform={`translate(${tx}, ${ty})`}>
           {children}

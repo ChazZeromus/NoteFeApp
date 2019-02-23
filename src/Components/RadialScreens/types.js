@@ -1,5 +1,7 @@
 // @flow
 
+export type Coord = { x: number, y: number };
+
 export type Segment = {
   id: string,
   icon: string,
