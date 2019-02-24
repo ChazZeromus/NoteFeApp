@@ -1,6 +1,6 @@
 // @flow
 import * as React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Animated } from 'react-native';
 import Svg, { Circle, Defs, Mask, Rect, G, RadialGradient, Stop } from 'react-native-svg';
 
 import styles, { svgStyles } from './styles';
@@ -18,7 +18,9 @@ type Props = {
   contentOffset?: number,
 };
 
-export default class Dial extends React.PureComponent<Props> {
+const AnimatedRadialGradient = Animated.createAnimatedComponent(RadialGradient);
+
+export class Dial extends React.PureComponent<Props> {
   _renderSegment(desc: types.SegmentDesc, maskOnly: boolean = false) : React.Node {
     const { position, innerRadius, outerRadius, contentOffset } = this.props;
     const { startAngle, endAngle, segment } = desc;
@@ -72,7 +74,7 @@ export default class Dial extends React.PureComponent<Props> {
               <Rect x="0" y="0" width={length} height={length} fill="#000" />
               {segmentList.map(desc => this._renderSegment(desc, true))}
             </Mask>
-            <RadialGradient id="selector-gradient"
+            <AnimatedRadialGradient id="selector-gradient"
               cx={sx}
               cy={sy}
               fx={sx}
@@ -84,7 +86,7 @@ export default class Dial extends React.PureComponent<Props> {
               <Stop offset="0" stopColor="#fff" stopOpacity="0.8" />
               <Stop offset="0.1" stopColor="#fff" stopOpacity="0.8" />
               <Stop offset="1" stopColor="#fff" stopOpacity="0" />
-            </RadialGradient>
+            </AnimatedRadialGradient>
           </Defs>
           {segmentList.map(desc => this._renderSegment(desc, false))}
           <Rect
@@ -99,3 +101,5 @@ export default class Dial extends React.PureComponent<Props> {
     )
   }
 }
+
+export default (Animated.createAnimatedComponent(Dial): React.ComponentType<Props>);

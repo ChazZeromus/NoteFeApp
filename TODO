@@ -1,2 +1,3 @@
-- Find a way to re-use segment list SVG elements (using Defs?) so a mask can be used to provide
+[x] Find a way to re-use segment list SVG elements (using Defs?) so a mask can be used to provide
   the radial gradiant hover effect.
+[x] Implement a side shrink property to add even gaps to adjacent segments.

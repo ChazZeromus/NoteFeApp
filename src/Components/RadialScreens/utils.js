@@ -26,7 +26,7 @@ export class Stroke {
   // Current point of stroke
   current: Coord;
   // Used to keep track of the center of the cricle used to stroke arcs.
-  currentCenter: ?Coord = null;
+  _currentCenter: ?Coord = null;
   // Used to perserve angle of last arc in relation to center point, as opposed
   // to calculating angle on-the-fly between center and current points.
   lastArcAngle: ?number = null;
@@ -36,7 +36,7 @@ export class Stroke {
   constructor(origin: Coord | Stroke) {
     if (origin instanceof Stroke) {
       this.current = origin.current;
-      this.currentCenter = origin.currentCenter;
+      this._currentCenter = origin._currentCenter;
       this.lastArcAngle = origin.lastArcAngle;
       this._result = origin._result;
     } else {
@@ -48,21 +48,29 @@ export class Stroke {
   clone() : Stroke {
     return new Stroke(this);
   }
+  
+  get currentCenter() : Coord {
+    const { _currentCenter } = this;
+    if (!_currentCenter) {
+      throw new Error('Arc center not set!');
+    }
+
+    return _currentCenter;
+  }
 
   get x() : number { return this.current.x; }
   get y() : number { return this.current.y; }
   get result() : string { return this._result + ' z'; }
 
   _updateArcAngle(newAngle: number) {
-    const { currentCenter } = this;
     // Recalculate if new angle is different, otherwise angles greater than 360 degrees
     // could be wrapped.
-    if (currentCenter && newAngle !== this.lastArcAngle) {
-      this.lastArcAngle = angleFromCoords(currentCenter, this.current);
+    if (this._currentCenter && newAngle !== this.lastArcAngle) {
+      this.lastArcAngle = angleFromCoords(this.currentCenter, this.current);
     }
   }
 
-  lineDir(angle: number, length: number) : Stroke {
+  lineDir(length: number, angle: number) : Stroke {
     this.current = xyToDir(this.x, this.y, length, angle);
     this._updateArcAngle(angle);
 
@@ -71,7 +79,15 @@ export class Stroke {
     return this;
   }
 
-  moveDir(angle: number, length: number) : Stroke {
+  lineDirFromCenter(length: number, angle: number) : Stroke {
+    const { x, y } = this.currentCenter;
+    this.current = xyToDir(x, y, length, angle);
+    this._updateArcAngle(angle);
+    this._result += ` L ${this.x} ${this.y}`;
+    return this;
+  }
+
+  moveDir(length: number, angle: number) : Stroke {
     this.current = xyToDir(this.x, this.y, length, angle);
     this._updateArcAngle(angle);
 
@@ -80,15 +96,11 @@ export class Stroke {
   }
 
   setCenter(center?: Coord) : Stroke {
-    this.currentCenter = center || this.current;
+    this._currentCenter = center || this.current;
     return this;
   }
 
   arc(radius: number, angle: number) : Stroke {
-    if (!this.currentCenter) {
-      throw new Error('Arc center not set!');
-    }
-
     const { currentCenter } = this;
     const { x: ax, y: ay } = currentCenter;
 
@@ -109,4 +121,12 @@ export class Stroke {
 
     return this;
   }
+}
+
+// Function used to determine a slight angle bias to ensure a gap of `shrinkSize` between
+// radial segments.
+export function getAngleOffsetFromShrink(radius: number, shrinkSize: number) : number {
+  const ratio = shrinkSize / radius;
+  const angle = Math.asin(ratio) / Math.PI * 180;
+  return angle;
 }
