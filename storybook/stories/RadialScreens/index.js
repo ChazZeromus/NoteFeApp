@@ -1,6 +1,6 @@
 // @flow
 import * as React from 'react';
-import { Button, Text, Image, View, StyleSheet } from 'react-native';
+import { Button, Text, Image, View, StyleSheet, Animated } from 'react-native';
 import { withKnobs, text, boolean, number } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react-native';
 import Svg, { Circle, G } from 'react-native-svg';
@@ -9,10 +9,31 @@ import * as Icons from '../../../src/Components/Icons';
 const NextIcon = Icons.Next;
 
 import CenterView from '../CenterView';
+import Panner from '../TestComponents/Panner';
 import RadialScreens from '../../../src/Components/RadialScreens';
 import RadialSegment from '../../../src/Components/RadialScreens/Segment';
 import Dial from '../../../src/Components/RadialScreens/Dial';
 import * as types from '../../../src/Components/RadialScreens/types';
+
+function angleList(total: number, slice: number) : Array<[number, number]> {
+  return Array(total / slice).fill(0).map((_, i) => [i * slice, i * slice + slice]);
+}
+
+class TestDialPanner extends React.Component<{}> {
+  render() : React.Node {
+    return (
+      <Panner>
+        {(panHandlers, animX, animY) => (
+          <View
+            style={{ flex: 1, backgroundColor: '#335', justifyContent: 'center' }}
+            {...panHandlers}
+          >
+          </View>
+        )}
+      </Panner>
+    );
+  }
+}
 
 storiesOf('Radial Screens', module)
   .addDecorator(withKnobs)
@@ -33,6 +54,8 @@ storiesOf('Radial Screens', module)
             <Svg width="100" height="100">
               <Circle cx="50" cy="50" r="3" fill="pink" />
               <RadialSegment
+                width={100}
+                height={100}
                 innerRadius={15}
                 outerRadius={35}
                 x={50}
@@ -54,6 +77,8 @@ storiesOf('Radial Screens', module)
     <Svg width="100" height="100">
       <Circle cx="50" cy="50" r="3" fill="pink" />
       <RadialSegment
+        width={100}
+        height={100}
         innerRadius={15}
         outerRadius={35}
         x={50}
@@ -67,6 +92,8 @@ storiesOf('Radial Screens', module)
     <Svg width="100" height="100">
       <Circle cx="50" cy="50" r="3" fill="pink" />
       <RadialSegment
+        width={100}
+        height={100}
         innerRadius={15}
         outerRadius={35}
         x={50}
@@ -77,6 +104,8 @@ storiesOf('Radial Screens', module)
         sideShrink={number('Side shrink', 1)}
       />
       <RadialSegment
+        width={100}
+        height={100}
         innerRadius={15}
         outerRadius={35}
         x={50}
@@ -87,6 +116,8 @@ storiesOf('Radial Screens', module)
         sideShrink={number('Side shrink', 1)}
       />
       <RadialSegment
+        width={100}
+        height={100}
         innerRadius={15}
         outerRadius={35}
         x={50}
@@ -101,15 +132,17 @@ storiesOf('Radial Screens', module)
   .add('Segments Adjacent Evenly', () => (
     <Svg width="300" height="300">
       <Circle cx="150" cy="150" r="3" fill="pink" />
-      {Array(360 / 90).fill(0).map((_, i) => (
+      {angleList(360, 45).map(([start, end], i) => (
         <RadialSegment
+          width={300}
+          height={300}
           key={i}
           innerRadius={50}
           outerRadius={100}
           x={150}
           y={150}
-          startAngle={90 * i}
-          endAngle={90 * i + 90}
+          startAngle={start}
+          endAngle={end}
           fill={{'0': 'blue', '1': 'green', '2': 'orange'}[i % 3]}
           sideShrink={number('Side shrink', 1)}
         />
@@ -120,6 +153,8 @@ storiesOf('Radial Screens', module)
     <Svg width="100" height="100">
       <Circle cx="50" cy="50" r="3" fill="pink" />
       <RadialSegment
+        width={100}
+        height={100}
         innerRadius={15}
         outerRadius={35}
         x={50}
@@ -130,6 +165,8 @@ storiesOf('Radial Screens', module)
         sideShrink={number('Side shrink', 1)}
       />
       <RadialSegment
+        width={100}
+        height={100}
         innerRadius={15}
         outerRadius={35}
         x={50}
@@ -145,6 +182,8 @@ storiesOf('Radial Screens', module)
     <Svg width="100" height="100">
       <Circle cx="50" cy="50" r="3" fill="pink" />
       <RadialSegment
+        width={100}
+        height={100}
         innerRadius={15}
         outerRadius={35}
         x={50}
@@ -155,6 +194,8 @@ storiesOf('Radial Screens', module)
         sideShrink={number('Side shrink', 1)}
       />
       <RadialSegment
+        width={100}
+        height={100}
         innerRadius={15}
         outerRadius={35}
         x={50}
@@ -170,6 +211,8 @@ storiesOf('Radial Screens', module)
     <Svg width="200" height="200">
       <Circle cx="100" cy="100" r="3" fill="pink" />
       <RadialSegment
+        width={200}
+        height={200}
         innerRadius={25}
         outerRadius={45}
         x={100}
@@ -184,6 +227,8 @@ storiesOf('Radial Screens', module)
       </RadialSegment>
 
       <RadialSegment
+        width={200}
+        height={200}
         innerRadius={25}
         outerRadius={45}
         x={100}
@@ -198,6 +243,8 @@ storiesOf('Radial Screens', module)
       </RadialSegment>
 
       <RadialSegment
+        width={200}
+        height={200}
         innerRadius={25}
         outerRadius={45}
         x={100}
@@ -212,28 +259,12 @@ storiesOf('Radial Screens', module)
       </RadialSegment>
     </Svg>
   ))
-  .add('Dial', () => (
-    <Dial
-      position={{ x: 0, y: 0 }}
-      selector={{ x: 130, y: 70 }}
-      innerRadius={20}
-      outerRadius={50}
-      segmentList={[
-        {
-          startAngle:45,
-          endAngle: 135,
-          segment: {
-            id: 'test',
-            icon: 'Next',
-          }
-        }
-      ]}
-    />
-  ))
   .add('Segment custom', () => (
     <Svg width="140" height="140">
       <Circle cx="70" cy="70" r="3" fill="pink" />
       <RadialSegment
+        width={140}
+        height={140}
         innerRadius={20}
         outerRadius={50}
         x={70}
@@ -243,6 +274,8 @@ storiesOf('Radial Screens', module)
         endAngle={number('end angle', 270)}
       />
       <RadialSegment
+        width={140}
+        height={140}
         innerRadius={20}
         outerRadius={50}
         x={70}
@@ -254,4 +287,38 @@ storiesOf('Radial Screens', module)
         sideShrink={number('side shrink', 0)}
       />
     </Svg>
+  ))
+  .add('Dial', () => (
+    <Dial
+      position={{ x: 0, y: 0 }}
+      selector={{ x: 150, y: 150 }}
+      innerRadius={50}
+      outerRadius={100}
+      segmentMargin={4}
+      segmentList={angleList(360, 45).map(([start, end], i) => ({
+        startAngle: start,
+        endAngle: end,
+        segment: {
+          id: `test-${i}`,
+          icon: 'Next',
+        }
+      }))}
+    />
+  ))
+  .add('Dial with panning', () => (
+    <Dial
+      position={{ x: 0, y: 0 }}
+      innerRadius={50}
+      outerRadius={100}
+      segmentMargin={4}
+      segmentList={angleList(360, 45).map(([start, end], i) => ({
+        startAngle: start,
+        endAngle: end,
+        segment: {
+          id: `test-${i}`,
+          icon: 'Next',
+        }
+      }))}
+      activeIndex={number('active index', -1)}
+    />
   ))

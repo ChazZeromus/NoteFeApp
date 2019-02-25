@@ -1,7 +1,7 @@
 // @flow
 import type { Coord } from './types';
 
-function xyToDir(
+export function xyToDir(
   centerX: number,
   centerY: number,
   radius: number,
@@ -14,7 +14,7 @@ function xyToDir(
   };
 }
 
-function angleFromCoords(p1: Coord, p2: Coord) : number {
+export function angleFromCoords(p1: Coord, p2: Coord) : number {
   let rads = Math.atan2(p2.x - p1.x, p1.y - p2.y);
   if (rads < 0) {
     rads += Math.PI * 2;

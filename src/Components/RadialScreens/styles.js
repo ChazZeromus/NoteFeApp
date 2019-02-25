@@ -5,6 +5,11 @@ const style : StyleSheet.Styles = {
   dial: {
     flex: 0,
   },
+  segmentContainer: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+  }
 };
 
 export default StyleSheet.create(style);
