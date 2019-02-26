@@ -13,7 +13,7 @@ type State = {
   showMenu: boolean,
 };
 
-export default class RadialMenuModal extends React.Component<Props, State> {
+export class RadialPanResponder extends React.Component<Props, State> {
   state: State = {
     showMenu: false,
   }
@@ -33,7 +33,7 @@ export default class RadialMenuModal extends React.Component<Props, State> {
   }
 
   handlePanResponderGrant(evt: any, gestureState: any) {
-
+    this.setState({ showMenu: true });
   }
 
   handlePanResponderMove(evt: any, gestureState: any) {
@@ -41,14 +41,10 @@ export default class RadialMenuModal extends React.Component<Props, State> {
   }
 
   handlePanResponderRelease(evt: any, gestureState: any) {
-
+    this.setState({ showMenu: false });
   }
 
   render() : React.Node {
-    return (
-      <>
-        {this.props.children(this.responder.panHandlers)}
-      </>
-    )
+    return this.props.children(this.responder.panHandlers);
   }
 }

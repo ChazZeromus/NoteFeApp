@@ -1,4 +1,5 @@
 // @flow
+import * as React from 'react';
 
 export type Coord = { x: number, y: number };
 
@@ -23,4 +24,8 @@ export type SegmentGroupDesc = {
   startAngle: number,
   endAngle: number,
   totalValue: number,
+};
+
+export type RadialContextData = {
+  menuRef: ?React.ElementRef<any>,
 };

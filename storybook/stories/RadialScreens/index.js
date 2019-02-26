@@ -10,10 +10,10 @@ const NextIcon = Icons.Next;
 
 import CenterView from '../CenterView';
 import Panner from '../TestComponents/Panner';
-import RadialScreens from '../../../src/Components/RadialScreens';
-import RadialSegment from '../../../src/Components/RadialScreens/Segment';
-import Dial from '../../../src/Components/RadialScreens/Dial';
-import * as types from '../../../src/Components/RadialScreens/types';
+// import RadialScreens from '../../../src/Components/RadialScreens';
+import RadialSegment from '../../../src/Components/RadialMenu/Segment';
+import Dial from '../../../src/Components/RadialMenu/Dial';
+import * as types from '../../../src/Components/RadialMenu/types';
 
 function angleList(total: number, slice: number) : Array<[number, number]> {
   return Array(total / slice).fill(0).map((_, i) => [i * slice, i * slice + slice]);
