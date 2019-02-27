@@ -10,7 +10,7 @@ const NextIcon = Icons.Next;
 
 import CenterView from '../CenterView';
 import Panner from '../TestComponents/Panner';
-import RadialMenu, { RadialPanResponder } from '../../../src/Components/RadialMenu';
+import { RadialPanResponder } from '../../../src/Components/RadialMenu';
 import RadialSegment from '../../../src/Components/RadialMenu/Segment';
 import Dial from '../../../src/Components/RadialMenu/Dial';
 import * as types from '../../../src/Components/RadialMenu/types';
@@ -18,6 +18,14 @@ import * as types from '../../../src/Components/RadialMenu/types';
 function angleList(total: number, slice: number) : Array<[number, number]> {
   return Array(total / slice).fill(0).map((_, i) => [i * slice, i * slice + slice]);
 }
+
+const dialStyle: types.DialStyle = {
+  position: { x: 0, y: 0 },
+  selector: { x: 150, y: 150 },
+  innerRadius: 50,
+  outerRadius: 100,
+  segmentMargin: 4,
+};
 
 const testSegmentList = angleList(360, 45).map(([start, end], i) => ({
   startAngle: start,
@@ -292,11 +300,7 @@ storiesOf('Radial Screens', module)
   ))
   .add('Dial', () => (
     <Dial
-      position={{ x: 0, y: 0 }}
-      selector={{ x: 150, y: 150 }}
-      innerRadius={50}
-      outerRadius={100}
-      segmentMargin={4}
+      dialStyle={dialStyle}
       segmentList={angleList(360, 45).map(([start, end], i) => ({
         startAngle: start,
         endAngle: end,
@@ -307,24 +311,22 @@ storiesOf('Radial Screens', module)
       }))}
     />
   ))
-  .add('Dial with panning', () => (
+  .add('Dial', () => (
     <Dial
-      position={{ x: 0, y: 0 }}
-      innerRadius={50}
-      outerRadius={100}
-      segmentMargin={4}
+      dialStyle={dialStyle}
       segmentList={testSegmentList}
       activeIndex={number('active index', -1)}
     />
   ))
   .add('Radial Menu modal with panner', () => (
-    <RadialPanResponder>
-      {panHandlers => (
+    <RadialPanResponder segmentList={testSegmentList}>
+      {(panHandlers, renderModal) => (
         <View
           {...panHandlers}
           style={{ flex: 1, backgroundColor: '#3aa' }}
         >
-          <Text>yo</Text>
+          <Text>This is some test text</Text>
+          {renderModal()}
         </View>
       )}
     </RadialPanResponder>

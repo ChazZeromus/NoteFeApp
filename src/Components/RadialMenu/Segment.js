@@ -24,7 +24,7 @@ type Props = {
   selected?: boolean,
 };
 
-export default class Segment extends React.Component<Props> {
+export default class Segment extends React.PureComponent<Props> {
   static defaultProps = {
     contentOffset: 0,
     sideShrink: 0,

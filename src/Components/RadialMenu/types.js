@@ -29,3 +29,12 @@ export type SegmentGroupDesc = {
 export type RadialContextData = {
   menuRef: ?React.ElementRef<any>,
 };
+
+export type DialStyle = {
+  position: Coord,
+  innerRadius: number,
+  outerRadius: number,
+  contentOffset?: number,
+  segmentMargin?: number,
+  containerStyle?: Object,
+};

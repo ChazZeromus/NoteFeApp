@@ -14,19 +14,15 @@ import * as Icons from '../Icons';
 // const AnimatedRadialGradient = Animated.createAnimatedComponent(RadialGradient);
 
 type Props = {
-  position: types.Coord,
-  innerRadius: number,
-  outerRadius: number,
+  dialStyle: types.DialStyle,
   segmentList: types.SegmentDescList,
-  contentOffset?: number,
-  segmentMargin?: number,
-  containerStyle?: Object,
   activeIndex?: number,
 };
 
 export default class Dial extends React.PureComponent<Props> {
   _renderSegment(index: number, desc: types.SegmentDesc, maskOnly: boolean = false) : React.Node {
-    const { position, innerRadius, outerRadius, contentOffset, segmentMargin, activeIndex } = this.props;
+    const { segmentList, dialStyle, activeIndex } = this.props;
+    const { position, innerRadius, outerRadius, contentOffset, segmentMargin } = dialStyle;
     const { startAngle, endAngle, segment } = desc;
     const { id, icon, color } = segment;
     const halfLength = innerRadius + outerRadius;
@@ -48,8 +44,6 @@ export default class Dial extends React.PureComponent<Props> {
     };
 
     const IconComponent = !maskOnly && icon ? Icons[icon] : null;
-
-    console.log(IconComponent);
 
     return (
       <Segment {...segmentProps}>
@@ -95,7 +89,8 @@ export default class Dial extends React.PureComponent<Props> {
 
 
   render() : React.Node {
-    const { position, segmentList, innerRadius, outerRadius } = this.props;
+    const { segmentList } = this.props;
+    const { containerStyle, position, innerRadius, outerRadius } = this.props.dialStyle;
     const length = (innerRadius + outerRadius) * 2;
 
     return (
@@ -109,7 +104,7 @@ export default class Dial extends React.PureComponent<Props> {
             { translateY: position.y },
           ]
         },
-        this.props.containerStyle,
+        containerStyle,
       ]}>
         {
         // <Defs>
