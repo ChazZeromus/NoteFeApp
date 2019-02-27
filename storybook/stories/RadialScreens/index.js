@@ -10,7 +10,7 @@ const NextIcon = Icons.Next;
 
 import CenterView from '../CenterView';
 import Panner from '../TestComponents/Panner';
-// import RadialScreens from '../../../src/Components/RadialScreens';
+import RadialMenu, { RadialPanResponder } from '../../../src/Components/RadialMenu';
 import RadialSegment from '../../../src/Components/RadialMenu/Segment';
 import Dial from '../../../src/Components/RadialMenu/Dial';
 import * as types from '../../../src/Components/RadialMenu/types';
@@ -18,6 +18,15 @@ import * as types from '../../../src/Components/RadialMenu/types';
 function angleList(total: number, slice: number) : Array<[number, number]> {
   return Array(total / slice).fill(0).map((_, i) => [i * slice, i * slice + slice]);
 }
+
+const testSegmentList = angleList(360, 45).map(([start, end], i) => ({
+  startAngle: start,
+  endAngle: end,
+  segment: {
+    id: `test-${i}`,
+    icon: 'Next',
+  }
+}));
 
 class TestDialPanner extends React.Component<{}> {
   render() : React.Node {
@@ -37,13 +46,6 @@ class TestDialPanner extends React.Component<{}> {
 
 storiesOf('Radial Screens', module)
   .addDecorator(withKnobs)
-  .addDecorator(storyFn => (
-    <CenterView>
-      <View style={{ flex: 0, backgroundColor: '#aaf' }}>
-        {storyFn()}
-      </View>
-    </CenterView>
-  ))
   .add('Segment Test', () => (
     <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-start', flexWrap: 'wrap', flex: 1 }}>
       {Array(24).fill().map((_, i) => {
@@ -311,14 +313,19 @@ storiesOf('Radial Screens', module)
       innerRadius={50}
       outerRadius={100}
       segmentMargin={4}
-      segmentList={angleList(360, 45).map(([start, end], i) => ({
-        startAngle: start,
-        endAngle: end,
-        segment: {
-          id: `test-${i}`,
-          icon: 'Next',
-        }
-      }))}
+      segmentList={testSegmentList}
       activeIndex={number('active index', -1)}
     />
+  ))
+  .add('Radial Menu modal with panner', () => (
+    <RadialPanResponder>
+      {panHandlers => (
+        <View
+          {...panHandlers}
+          style={{ flex: 1, backgroundColor: '#3aa' }}
+        >
+          <Text>yo</Text>
+        </View>
+      )}
+    </RadialPanResponder>
   ))
