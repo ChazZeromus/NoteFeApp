@@ -22,6 +22,10 @@ export function angleFromCoords(p1: Coord, p2: Coord) : number {
   return rads / Math.PI * 180;
 }
 
+export function lengthFromCoords(p1: Coord, p2: Coord) : number {
+  return Math.sqrt(Math.pow(Math.abs(p2.x - p1.x), 2) + Math.pow(Math.abs(p2.y - p1.y), 2));
+}
+
 export class Stroke {
   // Current point of stroke
   current: Coord;

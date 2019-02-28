@@ -20,29 +20,45 @@ type Props = {
   endAngle: number,
   contentOffset: number,
   sideShrink: number,
-  children?: React.Node,
-  selected?: boolean,
+  renderIcon?: () => React.Node,
+  segmentIndex?: number,
+  opacityAnim?: Animated.Value,
 };
 
-export default class Segment extends React.PureComponent<Props> {
+export default class Segment extends React.Component<Props> {
   static defaultProps = {
     contentOffset: 0,
     sideShrink: 0,
   }
+  
+  static getScalarProps(props: Props) : * {
+    const {
+      x, y, width, height, innerRadius, outerRadius, startAngle,
+      endAngle, contentOffset, sideShrink, segmentIndex
+    } = props;
 
-  opacityAnim: Animated.Value = new Animated.Value(0.7);
+    return {
+      x, y, width, height, innerRadius, outerRadius, startAngle,
+      endAngle, contentOffset, sideShrink, segmentIndex 
+    };
+  }
 
-  componentDidUpdate(props: Props) {
-    const { selected } = this.props;
-    if (props.selected !== selected) {
-      Animated.timing(
-        this.opacityAnim, {
-          toValue: selected ? 1 : 0.7,
-          duration: 70,
-          useNativeDriver: true,
-        }
-      ).start();
+  static getNonScalarProps(props: Props) : * {
+    const { renderIcon, opacityAnim } = props;
+    return { renderIcon, opacityAnim };
+  }
+
+  shouldComponentUpdate(nextProps: Props) : boolean {
+    const nextScalar = Segment.getScalarProps(nextProps);
+    const myScalar = Segment.getScalarProps(this.props);
+    if (!_.isEqual(nextScalar, myScalar)) {
+      return true;
     }
+
+    const nextNon = Segment.getNonScalarProps(nextProps);
+    const myNon = Segment.getNonScalarProps(this.props);
+
+    return nextNon.opacityAnim !== myNon.opacityAnim || nextNon.renderIcon !== myNon.renderIcon;
   }
 
   render() : React.Node {
@@ -51,7 +67,7 @@ export default class Segment extends React.PureComponent<Props> {
       innerRadius, outerRadius,
       startAngle, endAngle,
       sideShrink,
-      children,
+      renderIcon,
       ...otherProps
     } = this.props;
     const fullRadius = innerRadius + outerRadius;
@@ -81,7 +97,7 @@ export default class Segment extends React.PureComponent<Props> {
         width={width} height={height}
         style={[
           styles.segmentContainer,
-          {width, height, opacity: this.opacityAnim}
+          {width, height, opacity: this.props.opacityAnim}
         ]}
       >
         <Path
@@ -89,7 +105,7 @@ export default class Segment extends React.PureComponent<Props> {
           {...effectiveProps}
         />
         <G transform={`translate(${tx}, ${ty})`}>
-          {children}
+          {renderIcon && renderIcon()}
         </G>
       </AnimatedSvg>
     );

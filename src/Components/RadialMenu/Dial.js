@@ -16,16 +16,35 @@ import * as Icons from '../Icons';
 type Props = {
   dialStyle: types.DialStyle,
   segmentList: types.SegmentDescList,
-  activeIndex?: number,
+  activeIndex: ?number,
 };
 
 export default class Dial extends React.PureComponent<Props> {
+  animatedValues: Array<Animated.Value> = [];
+
+  constructor(props: Props) {
+    super(props);
+    this._refreshAnimatedValues();
+  }
+
   _renderSegment(index: number, desc: types.SegmentDesc, maskOnly: boolean = false) : React.Node {
     const { segmentList, dialStyle, activeIndex } = this.props;
     const { position, innerRadius, outerRadius, contentOffset, segmentMargin } = dialStyle;
     const { startAngle, endAngle, segment } = desc;
     const { id, icon, color } = segment;
     const halfLength = innerRadius + outerRadius;
+    const opacityAnim = index < this.animatedValues.length ? this.animatedValues[index] : undefined;
+
+    if (opacityAnim) {
+      Animated.timing(
+        opacityAnim,
+        {
+          useNativeDriver: true,
+          toValue: this.props.activeIndex === index ? 1 : 0.6,
+          duration: 70,
+        }
+      ).start();
+    }
 
     let segmentProps = {
       key: maskOnly ? `${id}-mask` : id,
@@ -40,7 +59,8 @@ export default class Dial extends React.PureComponent<Props> {
       fill: maskOnly ? '#fff' : color,
       fillOpacity: maskOnly ? "1" : undefined,
       sideShrink: typeof segmentMargin === 'number' ? segmentMargin / 2 : undefined,
-      selected: !maskOnly && index === activeIndex
+      segmentIndex: index,
+      opacityAnim,
     };
 
     const IconComponent = !maskOnly && icon ? Icons[icon] : null;
@@ -52,41 +72,17 @@ export default class Dial extends React.PureComponent<Props> {
     );
   }
 
-  // componentDidUpdate(prevProps: Props) {
-  //   const { selector, segmentList } = this.props;
+  componentDidUpdate(prevProps: Props) {
+    if (_.isEqual(prevProps.segmentList, this.props.segmentList)) {
+      return;
+    }
 
-  //   console.log(selector);
+    this._refreshAnimatedValues();
+  }
 
-  //   if (
-  //     _.isEqual(selector, prevProps.selector) &&
-  //     _.isEqual(segmentList, prevProps.segmentList)
-  //   ) {
-  //     return;
-  //   }
-
-  //   if (selector) {
-  //     const { innerRadius, outerRadius } = this.props;
-  //     const halfLength = innerRadius + outerRadius;
-
-  //     const angle = utils.angleFromCoords({x: halfLength, y: halfLength}, selector);
-  //     let newEntry: ?number = null;
-
-  //     for (let i = 0, l = segmentList.length; i < l; ++i) {
-  //       const { startAngle, endAngle } = segmentList[i];
-  //       if (angle >= startAngle && angle <= endAngle) {
-  //         newEntry = i;
-  //         break;
-  //       }
-  //     }
-
-  //     if (newEntry !== this.state.activeIndex) {
-  //       this.setState({ activeIndex: newEntry });
-  //     }
-  //   } else {
-  //     this.setState({ activeIndex: null });
-  //   }
-  // }
-
+  _refreshAnimatedValues() {
+    this.animatedValues = [...Array(this.props.segmentList.length).fill(() => new Animated.Value(0.7)).map(f => f())];
+  }
 
   render() : React.Node {
     const { segmentList } = this.props;

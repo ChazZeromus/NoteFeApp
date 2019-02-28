@@ -230,11 +230,12 @@ storiesOf('Radial Screens', module)
         startAngle={80}
         endAngle={100}
         contentOffset={7}
-      >
-        <G transform="translate(-8, -8)" opacity="0.5">
-          <NextIcon width={16} height={16} />
-        </G>
-      </RadialSegment>
+        renderIcon={() => (
+          <G transform="translate(-8, -8)" opacity="0.5">
+            <NextIcon width={16} height={16} />
+          </G>
+        )}
+      />
 
       <RadialSegment
         width={200}
@@ -246,11 +247,12 @@ storiesOf('Radial Screens', module)
         startAngle={80 + 180}
         endAngle={100 + 180}
         contentOffset={7}
-      >
-        <G transform="rotate(180) translate(-8, -8)" opacity="0.5">
-          <NextIcon width={16} height={16} />
-        </G>
-      </RadialSegment>
+        renderIcon={() => (
+          <G transform="translate(-8, -8)" opacity="0.5">
+            <NextIcon width={16} height={16} />
+          </G>
+        )}
+      />
 
       <RadialSegment
         width={200}
@@ -262,11 +264,12 @@ storiesOf('Radial Screens', module)
         startAngle={135}
         endAngle={180}
         contentOffset={7}
-      >
-        <G transform="rotate(180) translate(-8, -8)" opacity="0.5">
-          <NextIcon width={16} height={16} />
-        </G>
-      </RadialSegment>
+        renderIcon={() => (
+          <G transform="translate(-8, -8)" opacity="0.5">
+            <NextIcon width={16} height={16} />
+          </G>
+        )}
+      />
     </Svg>
   ))
   .add('Segment custom', () => (
@@ -297,19 +300,6 @@ storiesOf('Radial Screens', module)
         sideShrink={number('side shrink', 0)}
       />
     </Svg>
-  ))
-  .add('Dial', () => (
-    <Dial
-      dialStyle={dialStyle}
-      segmentList={angleList(360, 45).map(([start, end], i) => ({
-        startAngle: start,
-        endAngle: end,
-        segment: {
-          id: `test-${i}`,
-          icon: 'Next',
-        }
-      }))}
-    />
   ))
   .add('Dial', () => (
     <Dial
