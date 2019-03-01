@@ -46,6 +46,8 @@ export default class Dial extends React.PureComponent<Props> {
       ).start();
     }
 
+    const iconComponent = Icons[icon] || undefined;
+
     let segmentProps = {
       key: maskOnly ? `${id}-mask` : id,
       startAngle, endAngle,
@@ -61,6 +63,7 @@ export default class Dial extends React.PureComponent<Props> {
       sideShrink: typeof segmentMargin === 'number' ? segmentMargin / 2 : undefined,
       segmentIndex: index,
       opacityAnim,
+      icon: iconComponent,
     };
 
     const IconComponent = !maskOnly && icon ? Icons[icon] : null;

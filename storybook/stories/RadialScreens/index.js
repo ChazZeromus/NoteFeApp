@@ -230,11 +230,7 @@ storiesOf('Radial Screens', module)
         startAngle={80}
         endAngle={100}
         contentOffset={7}
-        renderIcon={() => (
-          <G transform="translate(-8, -8)" opacity="0.5">
-            <NextIcon width={16} height={16} />
-          </G>
-        )}
+        icon={NextIcon}
       />
 
       <RadialSegment
@@ -247,11 +243,7 @@ storiesOf('Radial Screens', module)
         startAngle={80 + 180}
         endAngle={100 + 180}
         contentOffset={7}
-        renderIcon={() => (
-          <G transform="translate(-8, -8)" opacity="0.5">
-            <NextIcon width={16} height={16} />
-          </G>
-        )}
+        icon={NextIcon}
       />
 
       <RadialSegment
@@ -264,11 +256,7 @@ storiesOf('Radial Screens', module)
         startAngle={135}
         endAngle={180}
         contentOffset={7}
-        renderIcon={() => (
-          <G transform="translate(-8, -8)" opacity="0.5">
-            <NextIcon width={16} height={16} />
-          </G>
-        )}
+        icon={NextIcon}
       />
     </Svg>
   ))

@@ -20,7 +20,7 @@ type Props = {
   endAngle: number,
   contentOffset: number,
   sideShrink: number,
-  renderIcon?: () => React.Node,
+  icon?: React.ComponentType<{}>,
   segmentIndex?: number,
   opacityAnim?: Animated.Value,
 };
@@ -44,8 +44,8 @@ export default class Segment extends React.Component<Props> {
   }
 
   static getNonScalarProps(props: Props) : * {
-    const { renderIcon, opacityAnim } = props;
-    return { renderIcon, opacityAnim };
+    const { icon, opacityAnim } = props;
+    return { icon, opacityAnim };
   }
 
   shouldComponentUpdate(nextProps: Props) : boolean {
@@ -58,7 +58,7 @@ export default class Segment extends React.Component<Props> {
     const nextNon = Segment.getNonScalarProps(nextProps);
     const myNon = Segment.getNonScalarProps(this.props);
 
-    return nextNon.opacityAnim !== myNon.opacityAnim || nextNon.renderIcon !== myNon.renderIcon;
+    return nextNon.opacityAnim !== myNon.opacityAnim || nextNon.icon !== myNon.icon;
   }
 
   render() : React.Node {
@@ -67,7 +67,7 @@ export default class Segment extends React.Component<Props> {
       innerRadius, outerRadius,
       startAngle, endAngle,
       sideShrink,
-      renderIcon,
+      icon: Icon,
       ...otherProps
     } = this.props;
     const fullRadius = innerRadius + outerRadius;
@@ -86,8 +86,8 @@ export default class Segment extends React.Component<Props> {
       .arc(fullRadius, startAngle + outerAngleBias);
 
     const { x: tx, y: ty } = insidePosition.moveDir(
+      this.props.contentOffset + innerRadius + outerRadius / 2,
       startAngle + (endAngle - startAngle) / 2,
-      this.props.contentOffset + innerRadius + outerRadius / 2
     ).current;
 
     const { width, height } = this.props;
@@ -104,9 +104,11 @@ export default class Segment extends React.Component<Props> {
           d={stroke.result}
           {...effectiveProps}
         />
-        <G transform={`translate(${tx}, ${ty})`}>
-          {renderIcon && renderIcon()}
-        </G>
+        {Icon && (
+          <G transform={`translate(${tx}, ${ty})`}>
+            <Icon />
+          </G>
+        )}
       </AnimatedSvg>
     );
   }
