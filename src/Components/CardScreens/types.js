@@ -15,7 +15,9 @@ export type ScreenProps = {
 
 export type ScreenComponentType = React.ComponentType<ScreenProps>;
 
-export type CardScreenRoutes = Array<{
-    id: string,
-    screen: ScreenComponentType,
-}>;
+export type CardRoute = {
+  id: string,
+  screen: ScreenComponentType,
+};
+
+export type CardScreenRoutes = Array<CardRoute>;

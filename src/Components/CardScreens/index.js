@@ -10,6 +10,21 @@ import * as types from './types';
 
 import { withKnobs, text, boolean, number } from '@storybook/addon-knobs';
 
+function createCompareFunc<T>(...funcs: Array<T => number>): (T, T) => number {
+  return (a: T, b: T) => {
+    for (const orderFunc of funcs) {
+      const aValue = orderFunc(a);
+      const bValue = orderFunc(b);
+
+      if (aValue !== bValue) {
+        return aValue - bValue;
+      }
+    }
+
+    return 0;
+  }
+}
+
 type Props = {
   routes: types.CardScreenRoutes,
   initialRoute: string,
@@ -18,22 +33,31 @@ type Props = {
 type State = {
   currentRoute: ?string,
   viewWidth: ?number,
-  cardDepthList: types.CardScreenRoutes,
-  currentSides: Array<string>,
+  cardDrawOrder: types.CardScreenRoutes,
+  sideLeft: ?string,
+  sideRight: ?string,
+  visibleRoutes: Array<string>,
 };
+
+type CardRef = React.ElementRef<typeof Card> | null;
 
 export default class CardScreens extends React.Component<Props, State> {
   state: State = {
     currentRoute: null,
     viewWidth: null,
-    cardDepthList: [],
-    currentSides: [],
+    cardDrawOrder: [],
+    sideLeft: null,
+    sideRight: null,
+    visibleRoutes: [],
   };
 
-  refMap: Map<string, React.ElementRef<typeof Card>> = new Map();
+  refMap: Map<string, CardRef> = new Map();
+  refFuncMap: Map<string, CardRef => void> = new Map();
+  forceFirstRoute: ?string;
 
   componentDidMount() {
-    this.setState({ currentRoute: this.props.initialRoute });
+    const { initialRoute } = this.props;
+    this.setState({ currentRoute: initialRoute, visibleRoutes: [ initialRoute ] });
   }
 
   componentDidUpdate(prevProps: Props, prevState: State) {
@@ -42,49 +66,55 @@ export default class CardScreens extends React.Component<Props, State> {
 
     const shouldUpdate = JSON.stringify(prevIds) !== JSON.stringify(currentIds)
       || prevState.currentRoute !== this.state.currentRoute
-      || prevState.currentSides !== this.state.currentSides;
+      || prevState.sideLeft !== this.state.sideLeft
+      || prevState.sideRight !== this.state.sideRight;
 
     if (shouldUpdate) {
-      this.updateCardList();
+      this.updateCardDrawOrder();
     }
+  }
+
+  // Generate a single function for each route
+  _getUpdateRefFunc(route: string) : CardRef => void {
+    let func = this.refFuncMap.get(route);
+
+    if (!func) {
+      func = ref => this.handleUpdateRef(route, ref);
+      this.refFuncMap.set(route, func);
+    }
+
+    return func;
   }
 
   handleUpdateRef(route: string, ref: ?React.ElementRef<typeof Card>) {
+    // console.log('set ref', route, ref);
     if (ref) {
       this.refMap.set(route, ref);
       if (route === this.state.currentRoute) {
-        ref.updateFocus();
+        ref.updateFocus(0);
       }
     } else {
       this.refMap.delete(route);
+      this.refFuncMap.delete(route);
     }
   }
 
-  updateCardList() {
+  updateCardDrawOrder() {
     const { routes } = this.props;
-    const { currentRoute } = this.state;
-    const cardDepthList = [ ...routes ];
+    const { currentRoute, sideLeft, sideRight } = this.state;
+    const cardDrawOrder = [ ...routes ];
 
-    cardDepthList.sort((a, b) => {
-      const isCurrentA = a.id === currentRoute ? 1 : 0;
-      const isCurrentB = b.id === currentRoute ? 1 : 0;
+    // Make sure current and siblings are sorted last
+    const compareFunc = createCompareFunc<types.CardRoute>(
+      r => r.id === sideRight ? 1 : 0,
+      r => r.id === currentRoute ? 1 : 0,
+      r => r.id === sideLeft ? 1 : 0,
+      r => routes.indexOf(r),
+    );
 
-      if (isCurrentA !== isCurrentB) {
-        return isCurrentA - isCurrentB;
-      }
+    cardDrawOrder.sort(compareFunc);
 
-      const { currentSides } = this.state;
-      const isSideA = currentSides.includes(a.id) ? 1 : 0;
-      const isSideB = currentSides.includes(b.id) ? 1 : 0;
-
-      if (isSideA !== isSideB) {
-        return isSideA - isSideB;
-      }
-
-      return routes.indexOf(a) - routes.indexOf(b);
-    });
-
-    this.setState({ cardDepthList });
+    this.setState({ cardDrawOrder });
   }
 
   handleGetSides(route: string) : CardSides {
@@ -98,40 +128,51 @@ export default class CardScreens extends React.Component<Props, State> {
       rightRef: rightRoute ? this.refMap.get(rightRoute.id) : null,
     };
 
-    const newSideRoutes = [];
+    const sideLeft = leftRoute ? leftRoute.id : null;
+    const sideRight = rightRoute ? rightRoute.id : null;
+    const visibleRoutes: Array<string> = [];
 
-    if (leftRoute) { newSideRoutes.push(leftRoute.id); }
-    if (rightRoute) { newSideRoutes.push(rightRoute.id); }
+    if (this.state.currentRoute) { visibleRoutes.push(this.state.currentRoute); }
+    if (sideLeft) { visibleRoutes.push(sideLeft); };
+    if (sideRight) { visibleRoutes.push(sideRight); };
 
-    this.setState({ currentSides: newSideRoutes });
+    this.setState({
+      sideLeft,
+      sideRight,
+      visibleRoutes,
+    });
 
     return cardSides;
   }
 
   handleCardRest(route: string) {
-    this.setState({ currentRoute: route, currentSides: [] });
+    this.setState({ currentRoute: route });
+  }
+
+  handleLayout = (e: any) => {
+    this.setState({ viewWidth: e.nativeEvent.layout.width });
   }
 
   render() : React.Node {
-    const { viewWidth } = this.state;
-    const shownRoutes = [...this.state.currentSides, this.state.currentRoute];
+    const { viewWidth, currentRoute } = this.state;
     return (
       <View
         style={styles.cardScreensContainer}
-        onLayout={({ nativeEvent }) => { this.setState({ viewWidth: nativeEvent.layout.width }) }}
+        onLayout={this.handleLayout}
       >
         {
           viewWidth
-          ? this.state.cardDepthList.map(({id, screen}) => (
+          ? this.state.cardDrawOrder.map(({id, screen}) => (
             <Card
+              key={id}
               routeId={id}
               onRest={() => this.handleCardRest(id)}
-              ref={ref => this.handleUpdateRef(id, ref)}
+              ref={this._getUpdateRefFunc(id)}
               getSides={() => this.handleGetSides(id)}
               viewWidth={viewWidth}
               screen={screen}
-              key={id}
-              hidden={!shownRoutes.includes(id)}
+              allowTouch={id === this.state.currentRoute}
+              hidden={!this.state.visibleRoutes.includes(id)}
             />
           ))
           : null

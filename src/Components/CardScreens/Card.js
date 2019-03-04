@@ -11,9 +11,8 @@ export type CardSides = {
 };
 
 type AnimOffsets = {
-  translate: number,
   rotate: number,
-  scale: number
+  hingeSide: number,
 };
 
 type Props = {
@@ -21,9 +20,12 @@ type Props = {
   viewWidth: number,
   getSides: () => CardSides,
   onRest: () => void,
-  restrictedPullDistance: number,
   routeId: string,
-  hidden?: boolean,
+  allowTouch: boolean,
+  hidden: boolean,
+  restrictedPull: number,
+  foldCutoff: number,
+  animationDuration: number,
 }
 
 type State = {
@@ -32,33 +34,52 @@ type State = {
 
 export default class Card extends React.Component<Props, State> {
   static defaultProps = {
-    restrictedPullDistance: 10,
+    // Ratio of view width that we max-out on when there are no cards
+    restrictedPull: 0.2,
+    // Ratio of view were the fold completes automatically
+    foldCutoff: 0.5,
+    // Duration of flip animation in ms
+    animationDuration: 150,
   };
 
   state: State = {
+    // Whether current card is in focus and not animating
     isFocused: false,
   };
 
+  // Which side of the screen should the card hinge as it animates. Left (-1) or right (1)
+  hingeSide: number = 0;
+  // Animation values for pre and post rotation based on which hinge is specified
+  preRotateTranslate = new Animated.Value(0);
+  postRotateTranslate = new Animated.Value(0);
+  // Animation value of card rotation for animation
   animRotate = new Animated.Value(0);
-  animTrans = new Animated.Value(0);
-  animScale = new Animated.Value(1);
 
+  // Animation event func for rotation
+  _animateEvent = Animated.event([{
+    rotate: this.animRotate,
+  }]);
+
+  // Pan responder handler
   responder: PanResponder;
 
-  lastTransValue: number = 0;
-  transOffset: number = 0;
+  // Keep track of swipe offset in case user touches a card mid-animation
+  lastSwipeOffset: number = 0;
+  // Current offset to use based off of lastSwipeOffset to offset when panning starts
+  swipeOffset: number = 0;
 
+  // References to card components adjacent this card in order to animate them in
   sides: CardSides = {
     leftRef: null,
     rightRef: null,
   };
 
-  constructor() {
-    super();
-    
+  constructor(props: Props) {
+    super(props);
+
+    this._updateTranslations(-1);
     this.responder = PanResponder.create({
-      onStartShouldSetPanResponder: (evt, gestureState) => true,
-      onPanResponderTerminationRequest: (evt, gestureState) => true,
+      onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder.bind(this),
       onPanResponderGrant: this._handlePanGrant.bind(this),
       onPanResponderMove: this._handlePanMove.bind(this),
       onPanResponderRelease: this._handlePanRelease.bind(this),
@@ -66,57 +87,73 @@ export default class Card extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.animTrans.addListener(({value}) => {
-      this.lastTransValue = value;
-      this.updateFocus();
+    this.animRotate.addListener(({value}) => {
+      this.updateFocus(value);
     });
   }
 
   componentWillUnmount() {
-    this.animTrans.removeAllListeners();
+    this.animRotate.removeAllListeners();
   }
 
-  updateFocus() {
-    const value = this.lastTransValue;
+  shouldComponentUpdate(nextProps: Props, nextState: State) : boolean {
+    // Compare only scalar values
+    const { screen, getSides, onRest, ...otherProps } = nextProps;
+    const { screen: myScreen, getSides: mySides, onRest: myRest, ...myProps } = this.props;
 
-    if (value === 0 && !this.state.isFocused) {
+    const otherJSON = JSON.stringify(otherProps);
+    const myJSON = JSON.stringify(myProps);
+
+    return otherJSON !== myJSON || this.state.isFocused !== nextState.isFocused;
+  }
+
+  updateFocus(rotateValue: number) {
+    if (rotateValue === 0 && !this.state.isFocused) {
+      this.lastSwipeOffset = 0;
       this.setState({ isFocused: true });
       this.props.onRest();
     }
-    else if (value !== 0 && this.state.isFocused) {
+    else if (rotateValue !== 0 && this.state.isFocused) {
       this.setState({ isFocused: false });
     }
+
+    this.lastSwipeOffset = this.props.viewWidth * -rotateValue;
+  }
+
+  _updateTranslations(side: number) {
+    const { viewWidth } = this.props;
+    this.hingeSide = side;
+    this.preRotateTranslate.setValue(side * viewWidth / 2);
+    this.postRotateTranslate.setValue(-side * viewWidth / 2);
+  }
+  
+  _handleStartShouldSetPanResponder(evt: any, gestureState: any) : boolean {
+    return this.props.allowTouch;
   }
 
   _handlePanGrant(evt: any, gestureState: any) {
-    this.transOffset = this.lastTransValue;
+    this.swipeOffset = this.lastSwipeOffset;
     this.sides = this.props.getSides();
+
+    this._handlePanMove(evt, gestureState);
   }
 
   _handlePanMove(evt: any, gestureState: any) {
-    const swipeOffset = this.transOffset + gestureState.dx;
+    const swipeOffset = this.swipeOffset + gestureState.dx;
+    this.lastSwipeOffset = swipeOffset;
+
     this.animate(this._calculateAnimation(
       swipeOffset,
       this._shouldRestrict(swipeOffset),
     ));
-
-    // Animate surrounding cards
-    const { leftRef, rightRef } = this.sides;
-    if (leftRef) {
-      leftRef.animate(this._calculateAnimation(
-        -this.props.viewWidth + swipeOffset
-      ));
-    }
-    if (rightRef) {
-      rightRef.animate(this._calculateAnimation(
-        this.props.viewWidth + swipeOffset
-      ));
-    }
+    this._updateSideCardAnimations(swipeOffset);
   }
   
   _handlePanRelease(evt: any, gestureState: any) {
-    const swipeOffset = this.transOffset + gestureState.dx;
-    const foldRightCutOff = this.props.viewWidth * 0.3;
+    const swipeOffset = this.swipeOffset + gestureState.dx;
+    this.lastSwipeOffset = swipeOffset;
+
+    const foldRightCutOff = this.props.viewWidth * this.props.foldCutoff;
     const restrict = this._shouldRestrict(swipeOffset);
     const { leftRef, rightRef } = this.sides;
     let foldDir = 0;
@@ -124,6 +161,7 @@ export default class Card extends React.Component<Props, State> {
     if (!restrict && Math.abs(swipeOffset) > foldRightCutOff) {
       foldDir = swipeOffset > foldRightCutOff ? 1 : -1;
     }
+
     this.doFold(foldDir);
 
     this.sides = { leftRef: null, rightRef: null };
@@ -141,67 +179,71 @@ export default class Card extends React.Component<Props, State> {
       || swipeOffset < 0 && this.sides.rightRef === null;
   }
 
-  animate: (offsets: AnimOffsets) => void = Animated.event([{
-    translate: this.animTrans,
-    rotate: this.animRotate,
-    scale: this.animScale,
-  }]);
+  animate(offsets: AnimOffsets) {
+    const { routeId } = this.props;
+    this._animateEvent(offsets);
+    this._updateTranslations(offsets.hingeSide);
+  }
+
+  _updateSideCardAnimations(swipeOffset: number) {
+    // Animate surrounding cards
+    const { leftRef, rightRef } = this.sides;
+    if (leftRef) {
+      leftRef.animate(this._calculateAnimation(
+        -this.props.viewWidth + swipeOffset
+      ));
+    }
+    if (rightRef) {
+      rightRef.animate(this._calculateAnimation(
+        this.props.viewWidth + swipeOffset
+      ));
+    }
+  }
+
+  _stopAnimation() {
+    this.animRotate.stopAnimation();
+    const { leftRef, rightRef } = this.sides;
+    if (leftRef) { leftRef.animRotate.stopAnimation(); }
+    if (rightRef) { rightRef.animRotate.stopAnimation(); }
+  }
 
   _calculateAnimation(swipeOffset: number, restrict: boolean = false) : AnimOffsets {
     // Card offset from left side of screen
     // Progress of card's position across width
-    const rightProgress = Math.min(swipeOffset / this.props.viewWidth, this.props.viewWidth);
-    // Same as above but absolute if card goes left
-    const rightProgressAbs = Math.min(Math.abs(swipeOffset) / this.props.viewWidth, this.props.viewWidth);
+    const rightProgress = swipeOffset / this.props.viewWidth;
+    const rotateProgress = -rightProgress;
+    const hingeSide = Math.sign(rightProgress);
 
     if (restrict) {
       return {
-        translate: rightProgress * this.props.restrictedPullDistance,
-        rotate: 0,
-        scale: 1,
+        rotate: rotateProgress * this.props.restrictedPull,
+        hingeSide,
       };
     }
 
     return {
-      translate: swipeOffset,
-      rotate: rightProgress,
-      scale: 1.0 - (rightProgressAbs * 0.4),
+      rotate: rotateProgress,
+      hingeSide,
     };
   }
 
   doFold(scale: number) {
     const clippedScale = Math.max(Math.min(1, scale), -1);
-    const duration = 200;
+    const duration = this.props.animationDuration;
     const anim = this._calculateAnimation(this.props.viewWidth * clippedScale);
 
-    Animated.parallel([
-      Animated.timing(this.animTrans, {
-        toValue: anim.translate,
-        useNativeDriver: true,
-        duration,
-      }),
-      Animated.timing(this.animRotate, {
-        toValue: anim.rotate,
-        useNativeDriver: true,
-        duration,
-      }),
-      Animated.timing(this.animScale, {
-        toValue: anim.scale,
-        useNativeDriver: true,
-        duration,
-      })
-    ]).start();
-  }
-
-  handlePress = () => {
-    this.doFold(1);
+    Animated.timing(this.animRotate, {
+      toValue: anim.rotate,
+      useNativeDriver: true,
+      duration,
+    }).start();
   }
 
   render() : React.Node {
     const Screen = this.props.screen;
     const interpRotate = this.animRotate.interpolate({
       inputRange: [0, 1],
-      outputRange: ['0deg', '90deg'],
+      outputRange: ['0deg', '-90deg'],
     });
 
     return (
@@ -210,10 +252,14 @@ export default class Card extends React.Component<Props, State> {
           styles.cardStyle,
           {
             transform: [
-              {perspective: 1000 },
-              {translateX: this.animTrans},
+              // TODO: Perform a translation before rotate and one after
+              // so rotation "hinges" on a particular side of the screen
+              // for a more realistic cube effect.
+              // Also maybe only cube the effect for non-current cards
+              {perspective: 5000 },
+              {translateX: this.preRotateTranslate },
               {rotateY: interpRotate},
-              {scale: this.animScale},
+              {translateX: this.postRotateTranslate },
             ]
           },
           { opacity: this.props.hidden ? 0 : 1 }

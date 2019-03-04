@@ -5,6 +5,8 @@ const style : StyleSheet.Styles = {
   panBaseContainer: {
     flex: 1,
     backgroundColor: '#0f0',
+    borderWidth: 1,
+    borderColor: '#000',
   },
   cardScreensContainer: {
     flex: 1,
