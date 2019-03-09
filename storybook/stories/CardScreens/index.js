@@ -30,8 +30,8 @@ const Screen = (props: types.ScreenProps) => (
   </View>
 );
 
-const GridScreen = (props: types.ScreenProps, color: string) => (
-  <View style={{ flex: 1, backgroundColor: color }} {...props.panHandlers}>
+const GridScreen = (props: types.ScreenProps, color: string, style?: any) => (
+  <View style={{ flex: 1, backgroundColor: color, ...style }} {...props.panHandlers}>
     <SvgGrid />
     <Text style={{ position: 'absolute', left: 20, top: 20 }}>{props.routeId} {props.isReady ? 'ready' : 'not ready'}</Text>
   </View>
