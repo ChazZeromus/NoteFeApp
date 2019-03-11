@@ -25,6 +25,9 @@ const dialStyle: types.DialStyle = {
   innerRadius: 50,
   outerRadius: 100,
   segmentMargin: 4,
+  knobRadius: 40,
+  knobColor: 'black',
+  knobOpacity: 0.7,
 };
 
 const testSegmentList = angleList(360, 45).map(([start, end], i) => ({
@@ -298,13 +301,13 @@ storiesOf('Radial Screens', module)
   ))
   .add('Radial Menu modal with panner', () => (
     <RadialPanResponder segmentList={testSegmentList}>
-      {(panHandlers, renderModal) => (
+      {(panHandlers, renderOverlay) => (
         <View
           {...panHandlers}
           style={{ flex: 1, backgroundColor: '#3aa' }}
         >
           <Text>This is some test text</Text>
-          {renderModal()}
+          {renderOverlay()}
         </View>
       )}
     </RadialPanResponder>

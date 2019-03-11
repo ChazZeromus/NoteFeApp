@@ -11,7 +11,8 @@ import * as utils from './utils';
 import Segment from './Segment';
 import * as Icons from '../Icons';
 
-// const AnimatedRadialGradient = Animated.createAnimatedComponent(RadialGradient);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
 
 type Props = {
   dialStyle: types.DialStyle,
@@ -21,6 +22,10 @@ type Props = {
 
 export default class Dial extends React.PureComponent<Props> {
   animatedValues: Array<Animated.Value> = [];
+  circleAnim = new Animated.ValueXY();
+  circleAnimEvent = new Animated.event(
+    [{ x: this.circleAnim.x, y: this.circleAnim.y }],
+  );
 
   constructor(props: Props) {
     super(props);
@@ -87,9 +92,21 @@ export default class Dial extends React.PureComponent<Props> {
     this.animatedValues = [...Array(this.props.segmentList.length).fill(() => new Animated.Value(0.7)).map(f => f())];
   }
 
+  setCirclePosition(pos: types.Coord) {
+    this.circleAnimEvent(pos);
+  }
+
   render() : React.Node {
     const { segmentList } = this.props;
-    const { containerStyle, position, innerRadius, outerRadius } = this.props.dialStyle;
+    const {
+      containerStyle,
+      position,
+      innerRadius,
+      outerRadius,
+      knobRadius,
+      knobColor,
+      knobOpacity,
+    } = this.props.dialStyle;
     const length = (innerRadius + outerRadius) * 2;
 
     return (
@@ -105,35 +122,23 @@ export default class Dial extends React.PureComponent<Props> {
         },
         containerStyle,
       ]}>
-        {
-        // <Defs>
-        //   <Mask id="dial-mask">
-        //     <Rect x="0" y="0" width={length} height={length} fill="#000" />
-        //     {segmentList.map(desc => this._renderSegment(desc, true))}
-        //   </Mask>
-        //   <AnimatedRadialGradient id="selector-gradient"
-        //     cx={sx}
-        //     cy={sy}
-        //     fx={sx}
-        //     fy={sy}
-        //     rx={length}
-        //     ry={length}
-        //     gradientUnits="userSpaceOnUse"
-        //   >
-        //     <Stop offset="0" stopColor="#fff" stopOpacity="0.8" />
-        //     <Stop offset="0.1" stopColor="#fff" stopOpacity="0.8" />
-        //     <Stop offset="1" stopColor="#fff" stopOpacity="0" />
-        //   </AnimatedRadialGradient>
-        // </Defs>
-        segmentList.map((desc, i) => this._renderSegment(i, desc, false))
-          // <Rect
-          //   x={0} y={0}
-          //   width="100%"
-          //   height="100%"
-          //   fill="url(#selector-gradient)"
-          //   mask="url(#dial-mask)"
-          // />
-        }
+        <Animated.View
+          style={{
+            position: 'absolute',
+            ...this.circleAnim.getLayout(),
+          }}
+        >
+          <Svg width={length} height={length}>
+            <Circle
+              cx={length / 2}
+              cy={length / 2}
+              r={knobRadius}
+              fill={knobColor}
+              fillOpacity={knobOpacity}
+            />
+          </Svg>
+        </Animated.View>
+        {segmentList.map((desc, i) => this._renderSegment(i, desc, false))}
       </View>
     )
   }

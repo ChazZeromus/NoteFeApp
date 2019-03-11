@@ -10,7 +10,7 @@ const style : StyleSheet.Styles = {
     left: 0,
     top: 0,
   },
-  dialModalView: {
+  dialOverlayView: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

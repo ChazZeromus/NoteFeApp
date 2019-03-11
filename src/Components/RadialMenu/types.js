@@ -32,6 +32,9 @@ export type RadialContextData = {
 
 export type DialStyle = {
   position: Coord,
+  knobRadius: number,
+  knobColor: string,
+  knobOpacity: number,
   innerRadius: number,
   outerRadius: number,
   contentOffset?: number,
