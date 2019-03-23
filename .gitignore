@@ -10,6 +10,7 @@
 /node_modules
 
 # misc
+.android_emu_name
 .env.local
 .env.development.local
 .env.test.local
